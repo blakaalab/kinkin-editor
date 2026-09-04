@@ -52,7 +52,7 @@
     "check:fix": "biome check --fix",
     "lint": "biome lint",
     "format": "biome format --write",
-    "prepublishOnly": "npm run build"
+    "prepare": "npm run build"
   },
   "peerDependencies": {
     "@tiptap/core": "^3.22.4",
