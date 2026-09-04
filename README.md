@@ -87,8 +87,9 @@ content` and plugin-key collisions, because `prosemirror-model` relies on
 `instanceof` checks and a shared schema registry. Declaring them as peers is what
 makes package managers dedupe to one copy.
 
-Keep every `@tiptap/*` package on the same version. Mixed minors fail at build
-time — see [Troubleshooting](#troubleshooting).
+Every `@tiptap/*` peer is pinned to `~3.22.4` — the version this library is built
+and tested against. Mixed Tiptap minors fail at build time, so the range is
+deliberately narrow; it'll widen once newer Tiptap is verified.
 
 ---
 
@@ -392,6 +393,13 @@ scoped container. Portal them into `getEditorPortalRoot()`.
 
 **My app's styles changed after adding the editor.** They shouldn't — that's what
 the scoping prevents. If it happens, it's a bug worth reporting.
+
+---
+
+## Licence
+
+Published as `UNLICENSED`. The package installs and works, but no redistribution
+rights are granted. If you need different terms, ask the maintainers.
 
 ---
 
