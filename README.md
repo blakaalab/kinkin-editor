@@ -25,43 +25,70 @@ upload and AI are plain callbacks you supply, or leave out.
 
 ## Install
 
-Not on npm yet. Install from GitHub:
+> **Not published to npm yet.** Until it is, install from GitHub — which works
+> with **npm only**. pnpm and Yarn block the build step git installs require
+> (see below). Publishing to npm fixes this for every package manager.
+
+### npm
 
 ```bash
 npm install github:blakaalab/kinkin-editor
 ```
 
-The repo doesn't commit build output, so npm builds the package during install
-(the `prepare` script). The first install takes a couple of minutes.
+That's the whole command. npm 7+ reads `peerDependencies` and installs React and
+all 21 `@tiptap/*` packages automatically — you don't list them.
 
-Once published this becomes:
+Since the repo doesn't commit build output, npm runs the `prepare` script to
+build the package during install. First install takes a couple of minutes.
 
-```bash
-npm install kinkin-editor
-```
+### pnpm
 
-### Peer dependencies
+A GitHub install **fails** with `ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED`: pnpm 10+
+refuses to run build scripts for git-hosted packages, and the allowlist entry it
+suggests is keyed by commit hash, so it breaks on every update.
 
-`react`, `react-dom` and the 21 `@tiptap/*` packages are **peer dependencies**.
-They're deliberately not bundled: two copies of React or ProseMirror on one page
-break at runtime in ways that are painful to debug.
-
-**npm 7+ installs peers automatically** — you don't need to list them. On pnpm or
-Yarn, or if you hit `UNMET PEER DEPENDENCY`, install them explicitly:
+Two options until this is on npm:
 
 ```bash
-npm install react react-dom @tiptap/core @tiptap/react @tiptap/pm @tiptap/starter-kit \
-  @tiptap/extensions @tiptap/markdown @tiptap/suggestion \
-  @tiptap/extension-emoji @tiptap/extension-highlight @tiptap/extension-history \
-  @tiptap/extension-horizontal-rule @tiptap/extension-image @tiptap/extension-list \
-  @tiptap/extension-mention @tiptap/extension-strike @tiptap/extension-table \
-  @tiptap/extension-table-of-contents @tiptap/extension-text-style \
-  @tiptap/extension-typography @tiptap/extension-unique-id \
-  @tiptap/extension-drag-handle-react
+# 1. Build a tarball from a local clone, then install that
+git clone https://github.com/blakaalab/kinkin-editor.git
+cd kinkin-editor && npm install && npm pack
+cd ../your-app && pnpm add ../kinkin-editor/kinkin-editor-0.1.0.tgz
 ```
 
-Every `@tiptap/*` peer wants `^3.22.4`, and they must all be on one version — see
-[Troubleshooting](#troubleshooting).
+```yaml
+# 2. Or allow the build, in pnpm-workspace.yaml (re-pin on every update)
+allowBuilds:
+  kinkin-editor@https://codeload.github.com/blakaalab/kinkin-editor/tar.gz/<commit-sha>: true
+```
+
+Once published, pnpm needs nothing special — it auto-installs peers by default:
+
+```bash
+pnpm add kinkin-editor
+```
+
+### Yarn
+
+Yarn does **not** auto-install peer dependencies — neither Classic nor Berry. You
+need them explicitly (brace expansion keeps it to two lines):
+
+```bash
+yarn add kinkin-editor
+yarn add react react-dom \
+  @tiptap/{core,react,pm,starter-kit,extensions,markdown,suggestion,extension-emoji,extension-highlight,extension-history,extension-horizontal-rule,extension-image,extension-list,extension-mention,extension-strike,extension-table,extension-table-of-contents,extension-text-style,extension-typography,extension-unique-id,extension-drag-handle-react}
+```
+
+### Why peer dependencies at all
+
+React and ProseMirror must be **single instances**. Two copies of React gives you
+"Invalid hook call"; two copies of ProseMirror gives you `RangeError: Invalid
+content` and plugin-key collisions, because `prosemirror-model` relies on
+`instanceof` checks and a shared schema registry. Declaring them as peers is what
+makes package managers dedupe to one copy.
+
+Keep every `@tiptap/*` package on the same version. Mixed minors fail at build
+time — see [Troubleshooting](#troubleshooting).
 
 ---
 
