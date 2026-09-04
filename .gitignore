@@ -1,4 +1,6 @@
 node_modules
 dist
+dist-playground
+*.tgz
 .DS_Store
 *.local

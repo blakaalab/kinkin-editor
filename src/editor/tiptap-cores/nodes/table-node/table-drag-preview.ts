@@ -1,3 +1,5 @@
+import { getEditorPortalRoot } from "@/editor/portal-root";
+
 export const createDragPreview = (
   type: "col" | "row",
   index: number,
@@ -49,6 +51,6 @@ export const createDragPreview = (
   }
 
   preview.appendChild(previewTable);
-  document.body.appendChild(preview);
+  (getEditorPortalRoot() ?? document.body).appendChild(preview);
   return preview;
 };

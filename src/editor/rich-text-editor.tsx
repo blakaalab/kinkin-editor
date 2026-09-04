@@ -34,6 +34,7 @@ import {
 import { StarterKit } from "@tiptap/starter-kit";
 
 import { MobileToolbar } from "@/editor/mobile-toolbar";
+import { EDITOR_SCOPE_CLASS, getEditorPortalRoot } from "@/editor/portal-root";
 import { SelectionToolbar } from "@/editor/selection-toolbar";
 import {
   AiAssist,
@@ -65,6 +66,7 @@ import {
   type StreamCompletionFn,
   useAiAssistStream,
 } from "@/editor/use-ai-assist-stream";
+import { cn } from "@/lib/utils";
 
 import "@/editor/tiptap-cores/styles/index.scss";
 
@@ -187,6 +189,8 @@ function EditorContentArea({
   useScrollToHash();
   useCursorVisibility({ editor });
 
+  const portalRoot = getEditorPortalRoot();
+
   if (!editor) {
     return null;
   }
@@ -203,7 +207,7 @@ function EditorContentArea({
       <SlashCommandSuggestionMenu />
       <SelectionToolbar onAiChatRequest={onAiChatRequest} aiMode={aiMode} />
       <AiAssistPanel onAiAssist={onAiAssist} onStopAiAssist={onStopAiAssist} />
-      {createPortal(<MobileToolbar />, document.body)}
+      {portalRoot && createPortal(<MobileToolbar />, portalRoot)}
     </EditorContent>
   );
 }
@@ -386,7 +390,7 @@ export const RichTextEditor = ({
   );
 
   return (
-    <div className="w-full h-full flex flex-col">
+    <div className={cn(EDITOR_SCOPE_CLASS, "w-full h-full flex flex-col")}>
       <EditorContext.Provider value={{ editor }}>
         {toolbar ? (
           <>

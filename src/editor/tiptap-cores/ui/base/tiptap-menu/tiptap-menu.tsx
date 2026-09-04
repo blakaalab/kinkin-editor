@@ -12,6 +12,7 @@ import {
 
 import * as Ariakit from "@ariakit/react";
 
+import { getEditorPortalRoot } from "@/editor/portal-root";
 import { useComposedRef } from "@/editor/tiptap-cores/hooks/use-composed-ref";
 import { useOnClickOutside } from "@/editor/tiptap-cores/hooks/use-on-click-outside";
 import { cn } from "@/editor/tiptap-cores/lib/tiptap-utils";
@@ -139,6 +140,7 @@ export const TiptapMenuContent = ({
   return (
     <Ariakit.Menu
       ref={useComposedRef(menuRef, ref)}
+      portalElement={() => getEditorPortalRoot() ?? null}
       className={cn(
         "group/keyboard z-50 flex flex-col h-full outline-none",
         "data-[state=closed]:hidden",

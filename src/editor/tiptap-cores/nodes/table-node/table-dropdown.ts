@@ -1,3 +1,5 @@
+import { getEditorPortalRoot } from "@/editor/portal-root";
+
 import { createIcon, type SvgNode } from "./table-icons";
 
 export interface DropdownItem {
@@ -68,7 +70,7 @@ export const showDropdown = (anchor: HTMLElement, items: DropdownItem[]) => {
     }
   });
 
-  document.body.appendChild(dropdown);
+  (getEditorPortalRoot() ?? document.body).appendChild(dropdown);
 
   const rect = anchor.getBoundingClientRect();
   const dropdownRect = dropdown.getBoundingClientRect();

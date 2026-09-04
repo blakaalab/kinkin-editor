@@ -2,6 +2,7 @@ import * as React from "react";
 
 import * as TooltipPrimitive from "@radix-ui/react-tooltip";
 
+import { getEditorPortalRoot } from "@/editor/portal-root";
 import { cn } from "@/lib/utils";
 
 function TooltipProvider({
@@ -47,7 +48,7 @@ function TooltipContent({
   showArrow?: boolean;
 }) {
   return (
-    <TooltipPrimitive.Portal>
+    <TooltipPrimitive.Portal container={getEditorPortalRoot()}>
       <TooltipPrimitive.Content
         data-slot="tooltip-content"
         sideOffset={sideOffset}
