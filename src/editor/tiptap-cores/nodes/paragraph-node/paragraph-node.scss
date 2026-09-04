@@ -1,0 +1,136 @@
+.tiptap-core.ProseMirror {
+  white-space: pre-wrap;
+  outline: none;
+
+  p:not(:first-child) {
+    margin-top: 0.75em;
+  }
+
+  p {
+    font-size: 1em;
+    line-height: 1.6;
+    font-weight: normal;
+    margin-bottom: 0.75em;
+  }
+
+  // Selection styles
+  &:not(.readonly):not(.ProseMirror-hideselection) {
+    ::selection {
+      background-color: var(--tt-core-selection);
+    }
+
+    .selection::selection {
+      background: transparent;
+    }
+  }
+
+  .selection {
+    display: inline;
+    background-color: var(--tt-core-selection);
+  }
+
+  // Selected node styles — inline/simple blocks get highlight with padding
+  .ProseMirror-selectednode:not(img):not(pre):not(.react-renderer):not(blockquote):not(ul):not(ol):not(table) {
+    border-radius: 0.25rem;
+    background-color: var(--tt-core-selection);
+    margin-left: -0.25rem;
+    margin-right: -0.25rem;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+  }
+
+  // Selected node styles — container/wrapper nodes get outline instead
+  blockquote.ProseMirror-selectednode,
+  ul.ProseMirror-selectednode,
+  ol.ProseMirror-selectednode,
+  table.ProseMirror-selectednode {
+    border-radius: 0.25rem;
+    outline: 2px solid var(--tt-core-selection);
+    background-color: var(--tt-core-selection);
+  }
+
+  .ProseMirror-hideselection {
+    caret-color: transparent;
+  }
+
+  // Resize cursor
+  &.resize-cursor {
+    cursor: ew-resize;
+    cursor: col-resize;
+  }
+}
+
+.tiptap-core.ProseMirror {
+  // Text decoration inheritance for spans
+  a span {
+    text-decoration: underline;
+  }
+
+  s span {
+    text-decoration: line-through;
+  }
+
+  u span {
+    text-decoration: underline;
+  }
+}
+
+.tiptap-core.ProseMirror [data-type="emoji"] img {
+  display: inline-block;
+  width: 1.25rem;
+  height: 1.25rem;
+  cursor: text;
+}
+
+.tiptap-core.ProseMirror {
+  a {
+    color: var(--tt-core-link);
+    text-decoration: underline;
+  }
+}
+
+.tiptap-core.ProseMirror {
+  [data-type="mention"] {
+    display: inline-block;
+    color: var(--tt-core-link);
+  }
+}
+
+.tiptap-core.ProseMirror {
+  .is-empty[data-placeholder]:has(
+      > .ProseMirror-trailingBreak:only-child
+    )::before {
+    content: attr(data-placeholder);
+    color: var(--tt-core-placeholder);
+    pointer-events: none;
+    height: 0;
+    position: absolute;
+    width: 100%;
+    text-align: inherit;
+    left: 0;
+    right: 0;
+  }
+}
+
+.prosemirror-dropcursor-block,
+.prosemirror-dropcursor-inline {
+  position: relative;
+  background: var(--tt-core-dropcursor) !important;
+  border-radius: 0 0.125rem 0.125rem 0;
+  margin-left: 0.375rem;
+  cursor: grabbing;
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: -0.375rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: transparent;
+    border: 2px solid var(--tt-core-dropcursor);
+    box-sizing: border-box;
+  }
+}

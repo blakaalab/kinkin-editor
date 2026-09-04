@@ -1,0 +1,74 @@
+@use "variables.scss";
+
+/* Node styles */
+@use "../nodes/blockquote-node/blockquote-node";
+@use "../nodes/code-block-node/code-block-node";
+@use "../nodes/horizontal-rule-node/horizontal-rule-node";
+@use "../nodes/list-node/list-node";
+@use "../nodes/heading-node/heading-node";
+@use "../nodes/image-node/image-node";
+@use "../nodes/paragraph-node/paragraph-node";
+@use "../nodes/table-node/table-node";
+
+.tiptap-core.ProseMirror * {
+  outline: none;
+}
+
+.tiptap-core.ProseMirror > * {
+  position: relative;
+}
+
+// Hide browser native selection when editor is not focused (https://github.com/ueberdosis/tiptap/issues/7006)
+.tiptap-core.ProseMirror:not(.readonly):not([contenteditable="false"]):not(
+    .ProseMirror-hideselection
+  ):not(.ProseMirror-focused)
+  ::selection {
+  background: transparent;
+}
+
+span.tiptap-core-slash-decoration.is-empty::after {
+  content: attr(data-decoration-content);
+}
+
+// Disable pointer events until mouse moves (prevents phantom hover on menu open)
+[data-cursor-hidden] {
+  &,
+  * {
+    cursor: none !important;
+    pointer-events: none !important;
+  }
+}
+
+// AI Assist styling during streaming
+.tiptap-core s[data-ai-assist],
+.tiptap-core s[data-ai-assist] * {
+  color: var(--tt-core-ai-assist-strikethrough);
+}
+
+.tiptap-core mark[data-ai-assist] {
+  color: var(--tt-core-ai-assist-highlight-text);
+  background-color: var(--tt-core-ai-assist-highlight);
+}
+
+// Streaming cursor — blinking caret at end of content during streaming
+.tiptap-core.is-streaming > *:last-child::after {
+  content: "";
+  display: inline-block;
+  width: 3px;
+  height: 1.1em;
+  background-color: var(--tt-core-dropcursor);
+  margin-left: 2px;
+  vertical-align: text-bottom;
+  border-radius: 1px;
+  animation: tt-streaming-cursor 1s step-end infinite;
+}
+
+@keyframes tt-streaming-cursor {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}

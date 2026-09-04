@@ -1,0 +1,100 @@
+@import "tailwindcss";
+
+/*
+ * Just the tokens the editor's UI primitives (Card, Kbd, Separator, Tooltip)
+ * and tiptap-cores node styles rely on. Swap these for your host app's own
+ * design tokens; nothing in the editor is hard-coded to these values.
+ */
+
+:root {
+  --text-main: #242424;
+  --text-secondary: #778397;
+}
+
+@theme inline {
+  --color-gray-50: #ffffff;
+  --color-gray-100: #fafbfb;
+  --color-gray-200: #f5f6fb;
+  --color-gray-300: #ced5de;
+  --color-gray-400: #a6aeba;
+  --color-gray-500: #778397;
+  --color-gray-600: #62748e;
+  --color-gray-700: #2e3c47;
+  --color-gray-800: #242424;
+  --color-gray-900: #181818;
+  --color-gray-950: #000000;
+
+  --color-blue-50: #fbfcff;
+  --color-blue-100: #f4f6fc;
+  --color-blue-200: #e6f1fd;
+  --color-blue-300: #d4e6fc;
+  --color-blue-400: #7ebcfd;
+  --color-blue-500: #52a4fb;
+  --color-blue-600: #1c85f5;
+  --color-blue-700: #1478e3;
+  --color-blue-800: #215db0;
+  --color-blue-900: #102959;
+  --color-blue-950: #04132f;
+
+  --color-neutral-300: #e2e2e2;
+
+  --color-primary-50: var(--color-blue-50);
+  --color-primary-100: var(--color-blue-100);
+  --color-primary-200: var(--color-blue-200);
+  --color-primary-300: var(--color-blue-300);
+  --color-primary-400: var(--color-blue-400);
+  --color-primary-500: var(--color-blue-500);
+  --color-primary-600: var(--color-blue-600);
+  --color-primary-700: var(--color-blue-700);
+  --color-primary-800: var(--color-blue-800);
+  --color-primary-900: var(--color-blue-900);
+  --color-primary-950: var(--color-blue-950);
+
+  --color-background: #fbfcff;
+  --color-foreground: var(--color-gray-700);
+  --color-placeholder: var(--color-gray-400);
+  --color-border: var(--color-neutral-300);
+  --color-ring: var(--color-blue-600);
+  --color-selected: var(--color-blue-50);
+  --color-active: var(--color-blue-50);
+  --color-muted: var(--color-gray-100);
+  --color-muted-foreground: var(--color-gray-500);
+  --color-destructive: #c61d1d;
+  --color-secondary: var(--text-secondary);
+
+  --font-sans: Inter, -apple-system, "BlinkMacSystemFont", "Segoe UI", "Roboto",
+    "Oxygen", "Ubuntu", "Cantarell", "Open Sans", "Helvetica Neue", sans-serif;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html,
+  body {
+    @apply min-h-screen;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1 { @apply text-[41px] font-semibold mt-5 mb-3; }
+  h2 { @apply text-[34px] font-semibold mt-5 mb-3; }
+  h3 { @apply text-[28px] font-semibold mt-5 mb-3; }
+  h4 { @apply text-xl font-semibold mt-5 mb-3; }
+  h5 { @apply text-lg font-semibold mt-5 mb-3; }
+
+  a { @apply text-blue-700; }
+
+  p { @apply mb-3; }
+
+  .tiptap p.is-editor-empty:first-child::before {
+    color: var(--color-placeholder);
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
+    margin: 0;
+  }
+}

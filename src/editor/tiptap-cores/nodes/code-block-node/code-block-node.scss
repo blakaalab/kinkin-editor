@@ -1,0 +1,31 @@
+.tiptap-core.ProseMirror {
+  // Inline code
+  code {
+    background-color: var(--tt-core-code-bg);
+    color: var(--tt-core-code-text);
+    font-family: "JetBrainsMono", monospace;
+    font-size: 0.875em;
+    border-radius: 0.25em;
+    padding: 0.13em 0.25em;
+  }
+
+  // Code blocks
+  pre {
+    font-family: "JetBrainsMono", monospace;
+    background-color: var(--tt-core-codeblock-bg);
+    color: var(--tt-core-code-text);
+    margin-top: 1.125em;
+    margin-bottom: 1.125em;
+    padding: 1em;
+    font-size: 1em;
+    border-radius: 0.25em;
+
+    code {
+      background-color: transparent;
+      border: none;
+      border-radius: 0;
+      -webkit-text-fill-color: inherit;
+      color: inherit;
+    }
+  }
+}

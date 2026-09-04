@@ -1,0 +1,28 @@
+.tiptap-core.ProseMirror {
+  blockquote {
+    position: relative;
+    padding-left: 1em;
+    padding-top: 0.375em;
+    padding-bottom: 0.375em;
+    margin: 1.125em 0;
+    font-size: 1em;
+
+    p {
+      margin-top: 0;
+      margin-bottom: 0.25em;
+    }
+
+    &::before,
+    &.is-empty::before {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      top: 0;
+      height: 100%;
+      width: 0.25em;
+      border-radius: 0.1em;
+      background-color: var(--tt-core-blockquote);
+      content: "";
+    }
+  }
+}
