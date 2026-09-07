@@ -1,3 +1,28 @@
+<p align="center">
+  <img src="assets/banner.svg" alt="Kinkin Editor - a drop-in rich text editor for React, built on Tiptap and ProseMirror" width="100%">
+</p>
+
+<p align="center">
+  <a href="https://www.npmjs.com/package/@blakaa/kinkin-editor"><img src="https://img.shields.io/npm/v/@blakaa/kinkin-editor?color=green" alt="npm version"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License"></a>
+  <a href="https://react.dev"><img src="https://img.shields.io/badge/react-18%20%7C%2019-149eca.svg" alt="React 18 and 19"></a>
+  <a href="https://tiptap.dev"><img src="https://img.shields.io/badge/tiptap-3.31-000000.svg" alt="Tiptap 3.31"></a>
+  <a href="#api-reference"><img src="https://img.shields.io/badge/types-included-3178c6.svg" alt="TypeScript types included"></a>
+</p>
+
+<p align="center">
+  <strong>Languages:</strong>
+  English ·
+  <a href="docs/README.vi.md">Tiếng Việt</a> ·
+  <a href="docs/README.zh-CN.md">简体中文</a> ·
+  <a href="docs/README.ja.md">日本語</a> ·
+  <a href="docs/README.ko.md">한국어</a> ·
+  <a href="docs/README.es.md">Español</a> ·
+  <a href="docs/README.pt-BR.md">Português (Brasil)</a> ·
+  <a href="docs/README.fr.md">Français</a> ·
+  <a href="docs/README.de.md">Deutsch</a>
+</p>
+
 # Kinkin Editor
 
 **A drop-in rich text editor for React.** A Notion-style WYSIWYG built on
@@ -6,18 +31,17 @@ HTML/JSON), with slash commands, tables, images, emoji, drag-to-reorder blocks, 
 table of contents, and an AI Assist panel that streams from whatever LLM you
 point it at.
 
-[![npm version](https://img.shields.io/npm/v/@blakaa/kinkin-editor.svg)](https://www.npmjs.com/package/@blakaa/kinkin-editor)
-[![React 18 and 19](https://img.shields.io/badge/react-18%20%7C%2019-149eca.svg)](https://react.dev)
-[![Tiptap 3.31](https://img.shields.io/badge/tiptap-3.31-000000.svg)](https://tiptap.dev)
-[![TypeScript types included](https://img.shields.io/badge/types-included-3178c6.svg)](#api-reference)
-
-**[Live demo and playground →](https://blakaalab.github.io/kinkin-editor/)** ·
-[Setup guide](https://blakaalab.github.io/kinkin-editor/#/docs) ·
-[Releases](https://github.com/blakaalab/kinkin-editor/releases)
+```bash
+npm install @blakaa/kinkin-editor
+```
 
 It's designed to go into a React app you already have: no global CSS reset, no
 required Tailwind setup, no provider to mount, and no backend assumptions — image
 upload and AI are plain callbacks you supply, or leave out.
+
+**[Live demo and playground →](https://blakaalab.github.io/kinkin-editor/)** ·
+[Setup guide](https://blakaalab.github.io/kinkin-editor/#/docs) ·
+[Releases](https://github.com/blakaalab/kinkin-editor/releases)
 
 - [Features](#features)
 - [Install](#install)
