@@ -1,6 +1,6 @@
 {
   "name": "@blakaa/kinkin-editor",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A standalone Tiptap-based rich text editor with slash commands, tables, AI assist and markdown I/O.",
   "license": "UNLICENSED",
   "type": "module",
