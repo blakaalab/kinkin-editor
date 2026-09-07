@@ -404,9 +404,16 @@ export function DocsPage() {
               />
 
               <Callout title="Licence">
-                Published as <code>UNLICENSED</code>. The package installs and
-                works, but no redistribution rights are granted. If you need
-                different terms, ask the maintainers.
+                <a
+                  href={`${REPO_URL}/blob/main/LICENSE`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="font-medium text-blue-700"
+                >
+                  MIT
+                </a>
+                . Use it, fork it, ship it commercially — just keep the
+                copyright notice.
               </Callout>
 
               <DocSubHeading>Why peer dependencies at all</DocSubHeading>

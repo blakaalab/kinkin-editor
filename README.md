@@ -1,29 +1,55 @@
 # Kinkin Editor
 
-A drop-in rich text editor for React, built on [Tiptap](https://tiptap.dev) and
-ProseMirror.
+**A drop-in rich text editor for React.** A Notion-style WYSIWYG built on
+[Tiptap](https://tiptap.dev) and ProseMirror: markdown in, markdown out (or
+HTML/JSON), with slash commands, tables, images, emoji, drag-to-reorder blocks, a
+table of contents, and an AI Assist panel that streams from whatever LLM you
+point it at.
 
-**[Live site and playground →](https://blakaalab.github.io/kinkin-editor/)** ·
+[![npm version](https://img.shields.io/npm/v/@blakaa/kinkin-editor.svg)](https://www.npmjs.com/package/@blakaa/kinkin-editor)
+[![React 18 and 19](https://img.shields.io/badge/react-18%20%7C%2019-149eca.svg)](https://react.dev)
+[![Tiptap 3.31](https://img.shields.io/badge/tiptap-3.31-000000.svg)](https://tiptap.dev)
+[![TypeScript types included](https://img.shields.io/badge/types-included-3178c6.svg)](#api-reference)
+
+**[Live demo and playground →](https://blakaalab.github.io/kinkin-editor/)** ·
+[Setup guide](https://blakaalab.github.io/kinkin-editor/#/docs) ·
 [Releases](https://github.com/blakaalab/kinkin-editor/releases)
 
-Markdown in, markdown out (or HTML/JSON). Slash commands, tables, images, emoji,
-drag-to-reorder blocks, a table of contents, and an AI Assist panel that streams
-from whatever LLM you point it at.
-
-It's designed to go into an app you already have: no global CSS reset, no
+It's designed to go into a React app you already have: no global CSS reset, no
 required Tailwind setup, no provider to mount, and no backend assumptions — image
 upload and AI are plain callbacks you supply, or leave out.
 
+- [Features](#features)
 - [Install](#install)
 - [Quick start](#quick-start)
-- [Using it with your own Tailwind](#using-it-with-your-own-tailwind)
+- [Using it with your own Tailwind CSS](#using-it-with-your-own-tailwind-css)
 - [Theming](#theming)
 - [API reference](#api-reference)
 - [Recipes](#recipes)
-- [What the editor can do](#what-the-editor-can-do)
 - [Troubleshooting](#troubleshooting)
 - [Licence](#licence)
 - [Local development](#local-development)
+
+---
+
+## Features
+
+**Slash menu** (type `/`): Paragraph, Heading 1–4, Bullet list, Numbered list,
+Task list, Quote, Code, Emoji, Table, Image, Horizontal line.
+
+**Also built in**
+
+- Markdown in and markdown out — and paste markdown to convert it to rich content
+- Emoji picker on `:`
+- Drag handle on each block to reorder; `Mod-Shift-↑/↓` to move, `Mod-Shift-D` to duplicate
+- Tables with column/row controls and drag-to-reorder
+- Link editing, code blocks, task lists, highlights, typography substitutions
+- Image upload through a callback you supply
+- Streaming AI Assist — improve, continue, summarize, fix grammar, simplify,
+  shorten, extend, translate, change tone, or a custom prompt
+- Table of contents via `onTocItemsChange`
+- Fixed, floating-selection and mobile toolbars
+- TypeScript types included; React 18 and 19
 
 ---
 
@@ -98,7 +124,7 @@ slash commands and the selection toolbar.
 
 ---
 
-## Using it with your own Tailwind
+## Using it with your own Tailwind CSS
 
 **Short version: nothing to configure. It cannot collide with your styles.**
 
@@ -201,7 +227,7 @@ const editorRef = useRef(null);
 | `editor` | `Editor \| null` | — | From `editorRef`. Needed to scroll to headings. |
 | `trackScroll` | `boolean` | `true` | Highlight the heading currently in view. It listens on *window* scroll, so turn it off if the editor sits in a scroll container of your own. |
 
-### `imageUploadHandler`
+### `imageUploadHandler` — image uploads
 
 Called for images dropped, pasted, or picked via the toolbar. Return the URL to
 embed; throwing marks the upload failed in the UI.
@@ -223,7 +249,7 @@ const imageUploadHandler: EditorImageUploadHandler = {
 };
 ```
 
-### `streamCompletion`
+### `streamCompletion` — streaming AI Assist
 
 Powers AI Assist. The library builds the prompt from the user's chosen action
 (`improve`, `continue`, `summarize`, `fix-grammar`, `simplify`, `shorten`,
@@ -313,31 +339,20 @@ const editorRef = useRef(null);
 
 ---
 
-## What the editor can do
-
-**Slash menu** (type `/`): Paragraph, Heading 1–4, Bullet list, Numbered list,
-Task list, Quote, Code, Emoji, Table, Image, Horizontal line.
-
-**Also built in**
-
-- Markdown paste — paste markdown and it converts to rich content
-- Emoji picker on `:`
-- Drag handle on each block to reorder; `Mod-Shift-↑/↓` to move, `Mod-Shift-D` to duplicate
-- Tables with column/row controls and drag-to-reorder
-- Link editing, code blocks, task lists, highlights, typography substitutions
-- Table of contents via `onTocItemsChange`
-
----
-
 ## Troubleshooting
 
-**The editor renders unstyled.** You didn't `import "@blakaa/kinkin-editor/style.css"`.
+### The editor renders unstyled
 
-**The editor has zero height.** It fills its container. Give the parent an
-explicit height, or `min-height: 0` if it's a flex child.
+You didn't `import "@blakaa/kinkin-editor/style.css"`.
 
-**Duplicate `@tiptap/core`, or `getPreviousBlockSibling is not exported`.** More
-than one Tiptap version in your tree. Tiptap's own transitive `^3.31.3` ranges
+### The editor has zero height
+
+It fills its container. Give the parent an explicit height, or `min-height: 0` if
+it's a flex child.
+
+### Duplicate `@tiptap/core`, or `getPreviousBlockSibling is not exported`
+
+More than one Tiptap version in your tree. Tiptap's own transitive `^3.31.3` ranges
 can resolve to a newer minor and pull in a second copy of `@tiptap/core`. Pin the
 scope in your app's `package.json`:
 
@@ -353,18 +368,22 @@ scope in your app's `package.json`:
 (Yarn calls this `resolutions`.) Move the whole scope together when upgrading —
 mixed Tiptap minors fail at build time, not runtime.
 
-**Menus or tooltips appear unstyled.** Something is rendering them outside the
-scoped container. Portal them into `getEditorPortalRoot()`.
+### Menus or tooltips appear unstyled
 
-**My app's styles changed after adding the editor.** They shouldn't — that's what
-the scoping prevents. If it happens, it's a bug worth reporting.
+Something is rendering them outside the scoped container. Portal them into
+`getEditorPortalRoot()`.
+
+### My app's styles changed after adding the editor
+
+They shouldn't — that's what the scoping prevents. If it happens, it's a bug
+worth reporting.
 
 ---
 
 ## Licence
 
-Published as `UNLICENSED`. The package installs and works, but no redistribution
-rights are granted. If you need different terms, ask the maintainers.
+[MIT](LICENSE). Use it, fork it, ship it commercially — just keep the copyright
+notice.
 
 ---
 
