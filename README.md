@@ -53,19 +53,19 @@ Two options until this is on npm:
 # 1. Build a tarball from a local clone, then install that
 git clone https://github.com/blakaalab/kinkin-editor.git
 cd kinkin-editor && npm install && npm pack
-cd ../your-app && pnpm add ../kinkin-editor/kinkin-editor-0.1.0.tgz
+cd ../your-app && pnpm add ../kinkin-editor/blakaa-kinkin-editor-0.1.0.tgz
 ```
 
 ```yaml
 # 2. Or allow the build, in pnpm-workspace.yaml (re-pin on every update)
 allowBuilds:
-  kinkin-editor@https://codeload.github.com/blakaalab/kinkin-editor/tar.gz/<commit-sha>: true
+  @blakaa/kinkin-editor@https://codeload.github.com/blakaalab/kinkin-editor/tar.gz/<commit-sha>: true
 ```
 
 Once published, pnpm needs nothing special — it auto-installs peers by default:
 
 ```bash
-pnpm add kinkin-editor
+pnpm add @blakaa/kinkin-editor
 ```
 
 ### Yarn
@@ -74,7 +74,7 @@ Yarn does **not** auto-install peer dependencies — neither Classic nor Berry. 
 need them explicitly (brace expansion keeps it to two lines):
 
 ```bash
-yarn add kinkin-editor
+yarn add @blakaa/kinkin-editor
 yarn add react react-dom \
   @tiptap/{core,react,pm,starter-kit,extensions,markdown,suggestion,extension-emoji,extension-highlight,extension-history,extension-horizontal-rule,extension-image,extension-list,extension-mention,extension-strike,extension-table,extension-table-of-contents,extension-text-style,extension-typography,extension-unique-id,extension-drag-handle-react}
 ```
@@ -97,8 +97,8 @@ deliberately narrow; it'll widen once newer Tiptap is verified.
 
 ```tsx
 import { useState } from "react";
-import { FixedToolbar, RichTextEditor } from "kinkin-editor";
-import "kinkin-editor/style.css";
+import { FixedToolbar, RichTextEditor } from "@blakaa/kinkin-editor";
+import "@blakaa/kinkin-editor/style.css";
 
 export function Editor() {
   const [markdown, setMarkdown] = useState("# Hello\n\nStart typing.");
@@ -119,7 +119,7 @@ export function Editor() {
 
 Two things that trip people up:
 
-1. **Import the stylesheet.** `import "kinkin-editor/style.css"` once, anywhere
+1. **Import the stylesheet.** `import "@blakaa/kinkin-editor/style.css"` once, anywhere
    in your app. Without it the editor renders unstyled.
 2. **Give it a height.** The editor fills its container (`height: 100%`). In a
    container with no height it collapses to nothing. Use a parent with an
@@ -239,7 +239,7 @@ Called for images dropped, pasted, or picked via the toolbar. Return the URL to
 embed; throwing marks the upload failed in the UI.
 
 ```ts
-import type { EditorImageUploadHandler } from "kinkin-editor";
+import type { EditorImageUploadHandler } from "@blakaa/kinkin-editor";
 
 const imageUploadHandler: EditorImageUploadHandler = {
   upload: async (file: File, onProgress: (percent: number) => void) => {
@@ -264,7 +264,7 @@ transport: call `onChunk` per token, `onComplete` when done, `onError` on
 failure, and respect `signal` so the stop button works.
 
 ```ts
-import type { StreamCompletionFn } from "kinkin-editor";
+import type { StreamCompletionFn } from "@blakaa/kinkin-editor";
 
 const streamCompletion: StreamCompletionFn = async ({
   message,
@@ -362,12 +362,12 @@ Task list, Quote, Code, Emoji, Table, Image, Horizontal line.
 
 ## Troubleshooting
 
-**The editor renders unstyled.** You didn't `import "kinkin-editor/style.css"`.
+**The editor renders unstyled.** You didn't `import "@blakaa/kinkin-editor/style.css"`.
 
 **The editor has zero height.** It fills its container. Give the parent an
 explicit height, or `min-height: 0` if it's a flex child.
 
-**`Cannot find module 'kinkin-editor'` after a GitHub install.** The `prepare`
+**`Cannot find module '@blakaa/kinkin-editor'` after a GitHub install.** The `prepare`
 build failed — check the install log. It needs devDependencies, so `--omit=dev`
 or `--ignore-scripts` will break it.
 
