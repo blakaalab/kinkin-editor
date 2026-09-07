@@ -50,7 +50,7 @@ export default defineConfig(({ mode }) => {
         ? [
             dts({
               include: ["src"],
-              exclude: ["src/app.tsx", "src/main.tsx"],
+              exclude: ["src/app.tsx", "src/main.tsx", "src/site/**"],
               insertTypesEntry: true,
             }),
           ]
