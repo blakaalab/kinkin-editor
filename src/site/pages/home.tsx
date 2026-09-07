@@ -54,7 +54,7 @@ export function Editor() {
         initialContent={markdown}
         contentType="markdown"
         outputContentType="markdown"
-        onChange={(value) => setMarkdown(value)}
+        onChange={(value) => setMarkdown(value as string)}
         toolbar={<FixedToolbar />}
       />
     </div>

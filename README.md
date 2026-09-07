@@ -3,7 +3,8 @@
 A drop-in rich text editor for React, built on [Tiptap](https://tiptap.dev) and
 ProseMirror.
 
-**[Live site and playground →](https://blakaalab.github.io/kinkin-editor/)**
+**[Live site and playground →](https://blakaalab.github.io/kinkin-editor/)** ·
+[Releases](https://github.com/blakaalab/kinkin-editor/releases)
 
 Markdown in, markdown out (or HTML/JSON). Slash commands, tables, images, emoji,
 drag-to-reorder blocks, a table of contents, and an AI Assist panel that streams
@@ -21,6 +22,7 @@ upload and AI are plain callbacks you supply, or leave out.
 - [Recipes](#recipes)
 - [What the editor can do](#what-the-editor-can-do)
 - [Troubleshooting](#troubleshooting)
+- [Licence](#licence)
 - [Local development](#local-development)
 
 ---
@@ -197,7 +199,7 @@ const editorRef = useRef(null);
 | --- | --- | --- | --- |
 | `items` | `TableOfContentDataItem[]` | `[]` | From `onTocItemsChange`. |
 | `editor` | `Editor \| null` | — | From `editorRef`. Needed to scroll to headings. |
-| `trackScroll` | `boolean` | `true` | Highlight the heading currently in view. |
+| `trackScroll` | `boolean` | `true` | Highlight the heading currently in view. It listens on *window* scroll, so turn it off if the editor sits in a scroll container of your own. |
 
 ### `imageUploadHandler`
 
@@ -271,6 +273,7 @@ Omit it and the AI buttons become no-ops, with a console warning.
 | `useAiAssistStream(editor, options)` | The hook behind AI Assist, if you're composing your own editor. |
 | `getEditorPortalRoot()` | The scoped container portalled UI renders into. |
 | `EDITOR_SCOPE_CLASS` | `"kinkin-editor"` — the scope class, for tagging your own portals. |
+| `<ToCItem />`, `<ToCEmptyState />` | The pieces `<ToC />` is built from, if you want your own outline layout. |
 | Types | `RichTextEditorProps`, `EditorImageUploadHandler`, `StreamCompletionFn`, `StreamCompletionParams` |
 
 ---
