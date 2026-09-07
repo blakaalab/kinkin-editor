@@ -3,6 +3,8 @@
 A drop-in rich text editor for React, built on [Tiptap](https://tiptap.dev) and
 ProseMirror.
 
+**[Live site and playground →](https://blakaalab.github.io/kinkin-editor/)**
+
 Markdown in, markdown out (or HTML/JSON). Slash commands, tables, images, emoji,
 drag-to-reorder blocks, a table of contents, and an AI Assist panel that streams
 from whatever LLM you point it at.
@@ -451,6 +453,10 @@ emoji picker, tables, drag handles, AI Assist UI, and markdown serialization.
   the shorthand on the element where those variables are in scope.
 - The playground builds to `dist-playground/` specifically so it can't overwrite
   the `dist/` that gets published.
+- `.github/workflows/deploy-pages.yml` publishes `dist-playground/` to GitHub
+  Pages on every push to `main`. A project page is served from `/<repo>/`, so
+  the site build sets `base: "/kinkin-editor/"` — only for `command === "build"`,
+  which leaves `npm run dev` on `/`.
 - This repo pins `@tiptap/*` to exactly 3.31.3 via `overrides` to keep one copy
   in its own tree. `overrides` are ignored when the package is installed
   elsewhere, which is why the troubleshooting note above exists.

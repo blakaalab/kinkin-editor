@@ -39,7 +39,7 @@ const scopeToEditor = prefixSelector({
   },
 });
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ mode, command }) => {
   const isLib = mode === "lib";
 
   return {
@@ -91,6 +91,13 @@ export default defineConfig(({ mode }) => {
             },
           },
         }
-      : { build: { outDir: "dist-playground" } }),
+      : {
+          // GitHub Pages serves a project site from /<repo>/, so built asset
+          // URLs need that prefix. Dev keeps "/" so `npm run dev` is unaffected.
+          base: command === "build" ? "/kinkin-editor/" : "/",
+          // The site builds to dist-playground so it can never clobber the
+          // library output that `files: ["dist"]` publishes.
+          build: { outDir: "dist-playground" },
+        }),
   };
 });
