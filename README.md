@@ -25,48 +25,12 @@ upload and AI are plain callbacks you supply, or leave out.
 
 ## Install
 
-> **Not published to npm yet.** Until it is, install from GitHub — which works
-> with **npm only**. pnpm and Yarn block the build step git installs require
-> (see below). Publishing to npm fixes this for every package manager.
-
-### npm
-
 ```bash
-npm install github:blakaalab/kinkin-editor
+npm install @blakaa/kinkin-editor    # or: pnpm add @blakaa/kinkin-editor
 ```
 
-That's the whole command. npm 7+ reads `peerDependencies` and installs React and
-all 21 `@tiptap/*` packages automatically — you don't list them.
-
-Since the repo doesn't commit build output, npm runs the `prepare` script to
-build the package during install. First install takes a couple of minutes.
-
-### pnpm
-
-A GitHub install **fails** with `ERR_PNPM_GIT_DEP_PREPARE_NOT_ALLOWED`: pnpm 10+
-refuses to run build scripts for git-hosted packages, and the allowlist entry it
-suggests is keyed by commit hash, so it breaks on every update.
-
-Two options until this is on npm:
-
-```bash
-# 1. Build a tarball from a local clone, then install that
-git clone https://github.com/blakaalab/kinkin-editor.git
-cd kinkin-editor && npm install && npm pack
-cd ../your-app && pnpm add ../kinkin-editor/blakaa-kinkin-editor-0.1.0.tgz
-```
-
-```yaml
-# 2. Or allow the build, in pnpm-workspace.yaml (re-pin on every update)
-allowBuilds:
-  @blakaa/kinkin-editor@https://codeload.github.com/blakaalab/kinkin-editor/tar.gz/<commit-sha>: true
-```
-
-Once published, pnpm needs nothing special — it auto-installs peers by default:
-
-```bash
-pnpm add @blakaa/kinkin-editor
-```
+That's the whole command on npm 7+ and pnpm: both read `peerDependencies` and
+install React and all 21 `@tiptap/*` packages for you — you don't list them.
 
 ### Yarn
 
@@ -367,10 +331,6 @@ Task list, Quote, Code, Emoji, Table, Image, Horizontal line.
 **The editor has zero height.** It fills its container. Give the parent an
 explicit height, or `min-height: 0` if it's a flex child.
 
-**`Cannot find module '@blakaa/kinkin-editor'` after a GitHub install.** The `prepare`
-build failed — check the install log. It needs devDependencies, so `--omit=dev`
-or `--ignore-scripts` will break it.
-
 **Duplicate `@tiptap/core`, or `getPreviousBlockSibling is not exported`.** More
 than one Tiptap version in your tree. Tiptap's own transitive `^3.31.3` ranges
 can resolve to a newer minor and pull in a second copy of `@tiptap/core`. Pin the
@@ -410,17 +370,19 @@ git clone https://github.com/blakaalab/kinkin-editor.git
 cd kinkin-editor
 npm install
 
-npm run dev               # playground with HMR
+npm run dev               # marketing site + docs + playground, with HMR
 npm run build             # library → dist/
-npm run build:playground  # demo app → dist-playground/
+npm run build:playground  # the site → dist-playground/
 npm run type-check
 npm run check             # Biome lint + format
 npm run check:fix
 ```
 
-`src/app.tsx` is the playground. It has demo implementations of
+`src/site/` is the public site — a landing page (`/`), a playground
+(`#/playground`) and the setup guide (`#/docs`), on a dependency-free hash
+router so it deploys to any static host without rewrite rules. Its demo
 `imageUploadHandler` (a local data-URL "upload") and `streamCompletion` (a fake
-token stream) — reference only, not for shipping.
+token stream) live in `src/site/demo.ts` — reference only, not for shipping.
 
 ### Layout
 
@@ -439,8 +401,17 @@ src/
 │   └── tiptap-cores/            # the editor engine (89 files)
 ├── components/ui/               # shadcn primitives the engine uses
 ├── lib/utils.ts                 # cn()
-├── styles/global.css            # playground-only styles
-└── app.tsx                      # playground
+├── styles/global.css            # site-only styles (has preflight)
+├── site/                        # the public site (not published)
+│   ├── router.tsx               # hash router, no dependencies
+│   ├── layout.tsx               # header, footer, page shell
+│   ├── code-block.tsx           # snippet rendering + copy button
+│   ├── logo-mark.tsx            # the K mark, traced to SVG paths
+│   ├── doc-parts.tsx            # docs primitives (tables, tabs, callouts)
+│   ├── demo.ts                  # demo upload/AI callbacks + sample content
+│   ├── magicui/                 # vendored MagicUI components (site-only)
+│   └── pages/                   # home.tsx, playground.tsx, docs.tsx
+└── app.tsx                      # route switch
 ```
 
 `tiptap-cores` is the bulk of it: extensions, node views, slash commands, the
@@ -464,6 +435,20 @@ emoji picker, tables, drag handles, AI Assist UI, and markdown serialization.
 
 - The library build (`--mode lib`) externalises React and all `@tiptap/*`, then
   scopes the CSS with `postcss-prefix-selector`. Both live in `vite.config.ts`.
+- `lib.css` ends its `@source "./"` with `@source not "./site"`. Without it
+  Tailwind scans the site too and every site-only utility lands in the published
+  stylesheet — that alone was 31 kB of the 82 kB it used to be.
+- The landing page uses a few [MagicUI](https://magicui.design) components,
+  vendored into `src/site/magicui/` the way the project intends (copy-in, MIT).
+  Their keyframes live in `styles/global.css`, never in `lib.css`. `motion` is a
+  devDependency for the same reason: the site uses it, the package doesn't.
+- Two of them (Marquee, ShimmerButton) do **not** use MagicUI's Tailwind-v4
+  `--animate-*` theme variable, and must not. A custom property is substituted
+  where it is *declared* — on `:root` — and those values reference a
+  per-instance `--duration` / `--speed` that does not exist there, so the whole
+  declaration computes to the guaranteed-invalid value and the animation never
+  runs, silently. They carry `animate-[...]` arbitrary values instead, which put
+  the shorthand on the element where those variables are in scope.
 - The playground builds to `dist-playground/` specifically so it can't overwrite
   the `dist/` that gets published.
 - This repo pins `@tiptap/*` to exactly 3.31.3 via `overrides` to keep one copy
@@ -472,4 +457,5 @@ emoji picker, tables, drag handles, AI Assist UI, and markdown serialization.
 
 ### Stack
 
-React 19, Vite 7, Tailwind 4, TypeScript 5.9, Tiptap 3.31.
+React 19, Vite 7, Tailwind 4, TypeScript 5.9, Tiptap 3.31. The site adds
+`motion` and vendored MagicUI components — neither ships in the package.

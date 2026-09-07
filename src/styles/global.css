@@ -98,3 +98,141 @@
     margin: 0;
   }
 }
+
+/*
+ * The home page's demo editor sizes to its content rather than scrolling, so
+ * the editor's built-in typing runway (pb-[30vh]) would leave a large blank
+ * gap under the text. Trim it for that one instance; the playground, which is
+ * a real editing surface, keeps the full runway.
+ */
+.hero-demo .tiptap-core {
+  padding-bottom: 1.25rem;
+}
+
+/*
+ * Scrollbars. Unlayered on purpose, so it outranks anything in @layer base.
+ * WebKit/Blink only — Firefox keeps its native scrollbar.
+ */
+::-webkit-scrollbar {
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 0.3rem;
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+/*
+ * Keyframes and animation tokens for the vendored MagicUI components in
+ * `src/site/magicui/`. Site-only — this file is never part of the published
+ * library, which is built from `lib.css`.
+ */
+@theme {
+  --animate-shiny-text: shiny-text 8s infinite;
+  --animate-aurora: aurora 8s ease-in-out infinite alternate;
+
+  @keyframes shiny-text {
+    0%,
+    90%,
+    100% {
+      background-position: calc(-100% - var(--shiny-width)) 0;
+    }
+    30%,
+    60% {
+      background-position: calc(100% + var(--shiny-width)) 0;
+    }
+  }
+
+  @keyframes aurora {
+    0% {
+      background-position: 0% 50%;
+      transform: rotate(-5deg) scale(0.9);
+    }
+    25% {
+      background-position: 50% 100%;
+      transform: rotate(5deg) scale(1.1);
+    }
+    50% {
+      background-position: 100% 50%;
+      transform: rotate(-3deg) scale(0.95);
+    }
+    75% {
+      background-position: 50% 0%;
+      transform: rotate(3deg) scale(1.05);
+    }
+    100% {
+      background-position: 0% 50%;
+      transform: rotate(-5deg) scale(0.9);
+    }
+  }
+}
+
+/*
+ * Marquee and ShimmerButton are driven per-instance by --duration / --speed,
+ * which MagicUI's Tailwind-v4 recipe puts in an `--animate-*` theme variable.
+ * That does not work: a custom property is substituted where it is *declared*,
+ * and these are declared on :root, where --duration and --speed do not exist —
+ * so the whole value computes to the guaranteed-invalid (empty) value and the
+ * animation silently never runs.
+ *
+ * So those keyframes live at the top level (always emitted) and the components
+ * carry `animate-[...]` arbitrary values, putting the shorthand on the element
+ * itself, where the per-instance variables are in scope.
+ */
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-100% - var(--gap)));
+  }
+}
+
+@keyframes marquee-vertical {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(calc(-100% - var(--gap)));
+  }
+}
+
+@keyframes shimmer-slide {
+  to {
+    transform: translate(calc(100cqw - 100%), 0);
+  }
+}
+
+@keyframes spin-around {
+  0% {
+    transform: translateZ(0) rotate(0);
+  }
+  15%,
+  35% {
+    transform: translateZ(0) rotate(90deg);
+  }
+  65%,
+  85% {
+    transform: translateZ(0) rotate(270deg);
+  }
+  100% {
+    transform: translateZ(0) rotate(360deg);
+  }
+}
+
+/* CSS-driven motion opts out too; the JS side is handled by <MotionConfig>. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
