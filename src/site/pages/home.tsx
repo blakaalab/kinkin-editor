@@ -459,7 +459,7 @@ export function HomePage() {
       {/* Quick start */}
       <section className="border-b border-gray-300/70 bg-white">
         <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:items-center">
-          <BlurFade inView direction="right">
+          <BlurFade inView direction="right" className="min-w-0">
             <div className="mb-3 text-xs font-semibold tracking-widest text-blue-700 uppercase">
               Quick start
             </div>
@@ -507,7 +507,7 @@ export function HomePage() {
             </div>
           </BlurFade>
 
-          <BlurFade inView direction="left" delay={0.1}>
+          <BlurFade inView direction="left" delay={0.1} className="min-w-0">
             <div className="relative overflow-hidden rounded-xl">
               <CodeBlock code={QUICK_START} lang="tsx" filename="editor.tsx" />
               <BorderBeam
