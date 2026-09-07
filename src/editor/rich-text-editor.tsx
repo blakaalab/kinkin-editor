@@ -265,7 +265,7 @@ export const RichTextEditor = ({
     editorProps: {
       attributes: {
         class:
-          "tiptap-core flex-1 px-2 pt-2 pb-[10vh] md:px-12 md:pt-1 md:pb-[30vh] ",
+          "tiptap-core flex-1 px-2 pt-2 pb-[10vh] md:px-20 md:pt-1 md:pb-[30vh] ",
       },
     },
     onBlur: () => {
