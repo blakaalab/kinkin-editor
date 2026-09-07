@@ -87,9 +87,9 @@ content` and plugin-key collisions, because `prosemirror-model` relies on
 `instanceof` checks and a shared schema registry. Declaring them as peers is what
 makes package managers dedupe to one copy.
 
-Every `@tiptap/*` peer is pinned to `~3.22.4` — the version this library is built
-and tested against. Mixed Tiptap minors fail at build time, so the range is
-deliberately narrow; it'll widen once newer Tiptap is verified.
+Every `@tiptap/*` peer is pinned to `~3.31.3` — the version this library is built
+and tested against. Mixed Tiptap minors fail at build time, so the range stays
+deliberately narrow and moves as a whole on each verified Tiptap upgrade.
 
 ---
 
@@ -372,15 +372,15 @@ build failed — check the install log. It needs devDependencies, so `--omit=dev
 or `--ignore-scripts` will break it.
 
 **Duplicate `@tiptap/core`, or `getPreviousBlockSibling is not exported`.** More
-than one Tiptap version in your tree. Tiptap's own transitive `^3.22.4` ranges
+than one Tiptap version in your tree. Tiptap's own transitive `^3.31.3` ranges
 can resolve to a newer minor and pull in a second copy of `@tiptap/core`. Pin the
 scope in your app's `package.json`:
 
 ```json
 {
   "overrides": {
-    "@tiptap/core": "3.22.4",
-    "@tiptap/pm": "3.22.4"
+    "@tiptap/core": "3.31.3",
+    "@tiptap/pm": "3.31.3"
   }
 }
 ```
@@ -466,10 +466,10 @@ emoji picker, tables, drag handles, AI Assist UI, and markdown serialization.
   scopes the CSS with `postcss-prefix-selector`. Both live in `vite.config.ts`.
 - The playground builds to `dist-playground/` specifically so it can't overwrite
   the `dist/` that gets published.
-- This repo pins `@tiptap/*` to exactly 3.22.4 via `overrides` to keep one copy
+- This repo pins `@tiptap/*` to exactly 3.31.3 via `overrides` to keep one copy
   in its own tree. `overrides` are ignored when the package is installed
   elsewhere, which is why the troubleshooting note above exists.
 
 ### Stack
 
-React 19, Vite 7, Tailwind 4, TypeScript 5.9, Tiptap 3.22.
+React 19, Vite 7, Tailwind 4, TypeScript 5.9, Tiptap 3.31.
