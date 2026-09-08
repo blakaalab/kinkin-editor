@@ -30,10 +30,20 @@
     text-decoration: underline;
   }
 
+  // The emoji extension renders GitHub's emoji as images carrying a legacy
+  // `align="absmiddle"` attribute. With no `vertical-align` of our own, that
+  // presentational hint wins and centres the image on the baseline plus half
+  // the x-height, which leaves a 1.25em image hanging ~2px below the text.
+  // -0.25em straddles the glyph box evenly (measured: 0.5px over and under at
+  // 16px/1.6), and matches what GitHub itself uses for these images.
+  //
+  // `em`, not `rem`: the emoji has to track the surrounding font size — inside
+  // a heading, and at whatever size a page gives the content element.
   [data-type="emoji"] img {
     display: inline-block;
-    width: 1.25rem;
-    height: 1.25rem;
+    width: 1.25em;
+    height: 1.25em;
+    vertical-align: -0.25em;
     cursor: text;
   }
 
