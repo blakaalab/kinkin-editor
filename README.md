@@ -192,6 +192,19 @@ inside:
 }
 ```
 
+`--tt-core-selection` and `--tt-core-selection-text` are a pair — theme both or
+neither. The text colour defaults to `currentColor`, so selected text keeps
+whatever colour the surrounding text has; the background does not follow
+anything, so a dark theme that retints the text but leaves the default pale blue
+background will put light text on it. Setting the two together is the safe move:
+
+```css
+html.dark .kinkin-editor {
+  --tt-core-selection: #1e3a5f;
+  /* --tt-core-selection-text follows the editor's text colour on its own */
+}
+```
+
 A colour an author picks from the text-colour or highlight menu is **not** part
 of the theme: it is written into the document itself (`<span style="color: …">`),
 so it renders the same everywhere and does not follow a consumer into a dark
@@ -206,7 +219,7 @@ separate `--tt-core-*` namespace, overridable the same way:
   --tt-core-table-header-bg: #fafafa;
   --tt-core-link: #2563eb;
   --tt-core-selection: #dbeafe;
-  --tt-core-selection-text: #1f2937;  /* selected text; defaults to --color-foreground */
+  --tt-core-selection-text: #1f2937;  /* selected text; defaults to currentColor, i.e. the text's own colour */
 }
 ```
 

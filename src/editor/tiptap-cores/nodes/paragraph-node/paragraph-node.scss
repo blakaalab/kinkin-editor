@@ -67,8 +67,13 @@
   // Selection styles. The colour is set alongside the background on purpose:
   // `::selection` cascades per property, so a host app's own
   // `::selection { color }` would otherwise survive on top of this background
-  // and can land unreadable. `inherit` is not an option — inside `::selection`
-  // it inherits the ancestor's `::selection` colour, which is the host's.
+  // and can land unreadable.
+  //
+  // The default is `currentColor`, which resolves to the text's own colour, so
+  // selected text keeps its colour whatever the host has themed it to. Note
+  // that `inherit` is NOT equivalent here: inside `::selection` it takes the
+  // ancestor's `::selection` colour — the host's — and the leak comes straight
+  // back.
   &:not(.readonly):not(.ProseMirror-hideselection) {
     ::selection {
       background-color: t.token("selection");

@@ -18,7 +18,7 @@ $defaults: (
   "code-bg": #eff0f7,
   "codeblock-bg": #f5f6fb,
   "selection": #e6f1fd,
-  "selection-text": var(--color-foreground, #2e3c47),
+  "selection-text": currentColor,
   "link": #1c85f5,
   "placeholder": #a6aeba,
   "dropcursor": #1c85f5,
