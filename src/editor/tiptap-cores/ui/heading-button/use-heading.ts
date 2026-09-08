@@ -218,7 +218,7 @@ export const useHeading = (config: UseHeadingConfig) => {
     return () => {
       editor.off("selectionUpdate", handleSelectionUpdate);
     };
-  }, [editor, level, hideWhenUnavailable]);
+  }, [editor, hideWhenUnavailable]);
 
   const handleToggle = useCallback(() => {
     if (!editor) {

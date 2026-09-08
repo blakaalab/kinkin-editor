@@ -104,7 +104,6 @@ export function AiAssistPanel({
       setInputValue("");
     },
     [
-      originalSelection,
       onAiAssist,
       isLoading,
       editor,
@@ -138,14 +137,7 @@ export function AiAssistPanel({
         surroundingContext: { afterSelectedText, beforeSelectedText },
       });
     },
-    [
-      originalSelection,
-      onAiAssist,
-      editor,
-      selectedText,
-      afterSelectedText,
-      beforeSelectedText,
-    ],
+    [onAiAssist, editor, selectedText, afterSelectedText, beforeSelectedText],
   );
 
   const handleTryAgain = useCallback(() => {
@@ -167,7 +159,6 @@ export function AiAssistPanel({
     });
   }, [
     lastRequest,
-    originalSelection,
     onAiAssist,
     aiResponse,
     editor,

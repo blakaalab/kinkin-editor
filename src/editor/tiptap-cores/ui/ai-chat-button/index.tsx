@@ -87,7 +87,7 @@ export const AiChatButton = forwardRef<HTMLButtonElement, AiChatButtonProps>(
           editor?.commands.setTextSelection(editor.state.selection.from);
         }
       },
-      [message, handleSendMessage],
+      [editor, message, handleSendMessage],
     );
 
     if (!isSelectionValid(editor)) {

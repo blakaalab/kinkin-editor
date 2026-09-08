@@ -143,9 +143,12 @@ export const SuggestionMenu = ({
     pluginKey instanceof PluginKey ? pluginKey : new PluginKey(pluginKey),
   );
 
+  // No dependency list: `internalSuggestionProps` is a rest object, so it is a
+  // new reference every render and a list containing it would never match.
+  // Running every render is the intent — the ref has to hold the latest props.
   useEffect(() => {
     internalSuggestionPropsRef.current = internalSuggestionProps;
-  }, [internalSuggestionProps]);
+  });
 
   useEffect(() => {
     onSuggestionStartRef.current = onSuggestionStart;
@@ -309,7 +312,7 @@ export const SuggestionMenu = ({
         editor.unregisterPlugin(pluginKey);
       }
     };
-  }, [editor, pluginKey, closePopup]);
+  }, [editor, pluginKey]);
 
   const onSelect = useCallback(
     (item: SuggestionItem) => {

@@ -24,7 +24,6 @@ function convertToEdges(options: ThrottleSettings): {
   return edges.length > 0 ? { edges } : {};
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function useThrottledCallback<T extends (...args: unknown[]) => unknown>(
   fn: T,
   wait = 250,
@@ -33,7 +32,9 @@ export function useThrottledCallback<T extends (...args: unknown[]) => unknown>(
 ) {
   const handler = useMemo(
     () => throttle(fn, wait, convertToEdges(options)),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // The list is the caller's, forwarded verbatim, so it cannot be an array
+    // literal here and there is nothing for the rule to check statically.
+    // biome-ignore lint/correctness/useExhaustiveDependencies: caller-supplied list
     dependencies,
   );
 
