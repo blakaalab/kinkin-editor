@@ -59,6 +59,8 @@ Tailwind，没有需要挂载的 provider，也不对后端做任何假设 —�
 - 流式 AI Assist —— 润色、续写、总结、修正语法、简化、缩短、扩写、翻译、调整语气，
   或自定义 prompt
 - 通过 `onTocItemsChange` 生成目录
+- 不依赖编辑器即可渲染已保存的文档 —— 一份只含 schema 的扩展清单和一份只用于展示的
+  样式表，二者均独立发布
 - 固定工具栏、选区浮动工具栏与移动端工具栏
 - 内置 TypeScript 类型；支持 React 18 和 19
 
@@ -179,8 +181,108 @@ Tailwind —— 发布出来的就是普通的编译后 CSS。
   --tt-core-table-header-bg: #fafafa;
   --tt-core-link: #2563eb;
   --tt-core-selection: #dbeafe;
+  --tt-core-selection-text: #1f2937;  /* 选中的文字；默认取 --color-foreground */
 }
 ```
+
+---
+
+## 不依赖编辑器渲染已保存的内容
+
+已保存的文档是 Tiptap JSON，要把它渲染到公开页面上需要两样东西，而编辑器的产物并不是
+获取它们的合适来源：schema 和内容 CSS。两者都单独发布。
+
+```tsx
+// 一个服务端组件。没有 React editor，没有编辑器样式表，也没有浏览器 API。
+import { generateHTML } from "@tiptap/core";
+import { CONTENT_SCOPE_CLASS, createContentExtensions } from "@blakaa/kinkin-editor/content";
+import "@blakaa/kinkin-editor/content.css";
+
+export function Post({ doc }: { doc: JSONContent }) {
+  const html = generateHTML(doc, createContentExtensions());
+
+  return (
+    <article
+      className={CONTENT_SCOPE_CLASS}
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  );
+}
+```
+
+### `createContentExtensions()`
+
+所有塑造文档结构的扩展 —— 节点、标记，以及它们上面的属性 —— 不包含任何仅为让编辑行为
+成立而存在的东西。`<RichTextEditor />` 在这份清单之上构建自己的清单，按名称挂上节点视图
+和命令，因此两者不会走偏：为编辑器新增的节点，就是这份清单已经能渲染的节点。
+
+这正是应当传给 `generateHTML`、`generateJSON` 或 `getSchema` 的清单。要避免的做法是手工
+照抄编辑器的扩展列表 —— 文档里若含有你的清单不认识的节点，就会抛出
+`RangeError: Unknown node type`，而且是抛给读者、在生产环境、发生在恰好用了新节点的那篇
+文章上。
+
+有三项看起来意外，但都不可或缺：
+
+| 条目 | 为什么需要它 |
+| --- | --- |
+| `ContentTable` | 在表格外层输出 `.table-node-wrapper > .table-scroll-container`，与编辑时节点视图所构建的结构一致。缺少它，宽表格会撑破页面，且所有表格 CSS 都不会生效。 |
+| `ImageUploadNode` | 未完成上传所留下的占位节点。在已保存的内容里很少见，并且会被 `content.css` 在页面上隐藏，但含有它的文档仍然必须能被解析。 |
+| `TableOfContents` | 负责标题上的 `id` 与 `data-toc-id` 属性。去掉它，每个标题都会失去锚点，页内链接以及你另行渲染的任何目录都会失效。 |
+
+`generateHTML` 通过 DOM 进行序列化，因此在服务端需要一个 DOM —— 请安装 `jsdom` 或
+`happy-dom`，并在调用前设置 `globalThis.document`。这是 Tiptap 的要求，而非 kinkin 的。
+（使用 jsdom 时你会看到一条 `HTMLCanvasElement's getContext() method` 警告：它来自 emoji
+扩展的能力探测，该扩展会正确地回退到图片 emoji。）
+
+### `content.css`
+
+用于展示的那一半。只包含内容规则 —— 没有工具栏、菜单、选区或拖拽相关的样式，没有 Tailwind
+工具类，没有 `@theme` 块，也没有 reset —— 而且每条规则都与编辑器的规则同源，因此渲染出的
+页面和编辑器不可能长得不一样。
+
+有三点值得了解：
+
+**它的作用范围限定在一个需要你主动添加的类上。** 在你把 `kinkin-content`（导出名为
+`CONTENT_SCOPE_CLASS`）加到元素上之前，什么样式都不会生效。字号、字体和文字颜色一律继承而
+从不设定 —— 所有尺寸都以 `em` 为单位，因此内容会随页面给它的环境一同缩放。
+
+**它位于一个 cascade layer 中。** 所有规则都在 `@layer kinkin-content` 里。不在任何 layer
+中的 CSS 无论特异性如何都会胜过 layer 中的规则，所以你自己的规则无需 `!important` 或特异性
+博弈即可生效：
+
+```css
+/* 不属于任何 layer，因此这条规则胜过 content.css —— 选择器不必比被覆盖的那条更具体。 */
+.kinkin-content h1 { font-size: 2.5rem; }
+```
+
+**每一个颜色都是 `--tt-core-*` 变量，而这份样式表一个都不声明。** 每个颜色都是一个 `var()`，
+并以其默认值作为回退，因此在内容元素之上的任何位置设置某个 token 就能为它换主题 —— 包括
+暗色模式：
+
+```css
+html.dark {
+  --tt-core-code-bg: #232733;
+  --tt-core-code-text: #e6e8ec;
+  --tt-core-codeblock-bg: #1b1f27;
+  --tt-core-blockquote: #5b6472;
+  --tt-core-link: #7ebcfd;
+  --tt-core-horizontal-line: #2b303a;
+  --tt-core-table-border: #2b303a;
+  --tt-core-table-header-bg: #1b1f27;
+  --tt-core-table-stripe-bg: #191c23;
+  --tt-core-tasklist-bg: #232733;
+  --tt-core-tasklist-border: #5b6472;
+}
+```
+
+（这也正是该样式表不在 `.kinkin-content` 自身上声明默认值的原因：继承而来的自定义属性是按
+就近程度而非特异性来决定的，所以写在内容元素上的声明会悄悄胜过写在 `html.dark` 上的声明。）
+
+两个纯展示层面的取舍：任务列表的复选框会被渲染但不可点击 —— 页面没有地方保存这次点击 ——
+以及 `imageUpload` 占位节点会被隐藏。
+
+一条约束：作用范围元素采用 `white-space: pre-wrap`，与编辑器一致，因此作者输入的连续空格会
+被保留。不要在其中对生成的 HTML 做美化或缩进 —— 那些缩进会被渲染出来。
 
 ---
 
@@ -305,6 +407,8 @@ const streamCompletion: StreamCompletionFn = async ({
 | `useAiAssistStream(editor, options)` | AI Assist 背后的 hook，适用于你自己组装编辑器的场景。 |
 | `getEditorPortalRoot()` | portal UI 渲染进入的作用域容器。 |
 | `EDITOR_SCOPE_CLASS` | `"kinkin-editor"` —— 作用域 class，用于标记你自己的 portal。 |
+| `createContentExtensions()` | 只含 schema 的扩展清单，用于渲染已保存的文档。也可从 `@blakaa/kinkin-editor/content` 引入。 |
+| `CONTENT_SCOPE_CLASS` | `"kinkin-content"` —— `content.css` 所限定的类名。 |
 | `<ToCItem />`、`<ToCEmptyState />` | 构成 `<ToC />` 的零件，便于你自定义大纲布局。 |
 | 类型 | `RichTextEditorProps`、`EditorImageUploadHandler`、`StreamCompletionFn`、`StreamCompletionParams` |
 
@@ -382,6 +486,20 @@ scope：
 
 不应该发生 —— 作用域隔离正是为了防止这一点。如果真的发生了，这是一个值得上报的
 bug。
+
+### 渲染已保存的 JSON 时报 `RangeError: Unknown node type`
+
+你传给 `generateHTML` 的扩展清单没有覆盖整个文档。请传入来自
+`@blakaa/kinkin-editor/content` 的 `createContentExtensions()`，而不是手写清单 —— 它就是
+编辑器所运行的那套 schema，因此编辑器新增节点后它依然正确。参见
+[不依赖编辑器渲染已保存的内容](#不依赖编辑器渲染已保存的内容)。
+
+### 渲染出的内容没有样式，或表格撑破页面
+
+请引入 `@blakaa/kinkin-editor/content.css`，并把 `kinkin-content` 加到承载 HTML 的元素
+上 —— 没有这个类，那份样式表里的任何规则都不会生效。如果问题确实是表格溢出，那说明生成
+HTML 时用的是普通的 `Table` 扩展，而不是 `createContentExtensions()` 里的那个 —— 后者会
+输出 CSS 所需的滚动容器。
 
 ---
 

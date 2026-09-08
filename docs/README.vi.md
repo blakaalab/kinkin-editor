@@ -60,6 +60,8 @@ về backend — upload ảnh và AI chỉ là những callback bạn tự cung 
 - AI Assist theo luồng — cải thiện, viết tiếp, tóm tắt, sửa ngữ pháp, đơn giản hoá,
   rút gọn, mở rộng, dịch, đổi giọng văn, hoặc prompt tuỳ ý
 - Mục lục qua `onTocItemsChange`
+- Render tài liệu đã lưu mà không cần editor — một danh sách extension chỉ gồm
+  schema và một stylesheet chỉ để hiển thị, cả hai đều được phát hành riêng
 - Thanh công cụ cố định, nổi theo vùng chọn, và cho di động
 - Có sẵn kiểu TypeScript; hỗ trợ React 18 và 19
 
@@ -184,8 +186,122 @@ dùng một namespace riêng là `--tt-core-*`, ghi đè theo cùng cách:
   --tt-core-table-header-bg: #fafafa;
   --tt-core-link: #2563eb;
   --tt-core-selection: #dbeafe;
+  --tt-core-selection-text: #1f2937;  /* chữ được chọn; mặc định lấy --color-foreground */
 }
 ```
+
+---
+
+## Render nội dung đã lưu mà không cần editor
+
+Tài liệu đã lưu là Tiptap JSON, và để render nó trên một trang công khai bạn cần
+hai thứ mà bundle của editor không phải nơi thích hợp để lấy: schema và CSS cho
+nội dung. Cả hai đều được phát hành riêng.
+
+```tsx
+// Một server component. Không có React editor, không stylesheet của editor, không API trình duyệt.
+import { generateHTML } from "@tiptap/core";
+import { CONTENT_SCOPE_CLASS, createContentExtensions } from "@blakaa/kinkin-editor/content";
+import "@blakaa/kinkin-editor/content.css";
+
+export function Post({ doc }: { doc: JSONContent }) {
+  const html = generateHTML(doc, createContentExtensions());
+
+  return (
+    <article
+      className={CONTENT_SCOPE_CLASS}
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  );
+}
+```
+
+### `createContentExtensions()`
+
+Mọi extension định hình tài liệu — node, mark, và các attribute trên chúng — và
+không có gì chỉ tồn tại để việc soạn thảo hoạt động. `<RichTextEditor />` dựng
+danh sách của riêng nó trên nền danh sách này, gắn thêm node view và command theo
+tên, nên hai bên không thể lệch nhau: một node được thêm cho editor cũng là node
+mà danh sách này đã render được.
+
+Đây là danh sách cần truyền cho `generateHTML`, `generateJSON` hoặc `getSchema`.
+Điều cần tránh là tự chép tay danh sách extension của editor — một tài liệu chứa
+node mà danh sách của bạn không biết sẽ ném ra `RangeError: Unknown node type`,
+và nó ném ra cho người đọc, trên production, đúng vào bài viết tình cờ dùng node
+mới đó.
+
+Ba mục trông lạ nhưng đều thiết yếu:
+
+| Mục | Vì sao cần |
+| --- | --- |
+| `ContentTable` | Sinh ra `.table-node-wrapper > .table-scroll-container` bao quanh bảng, khớp với những gì node view dựng khi soạn thảo. Thiếu nó, bảng rộng sẽ tràn khỏi trang và không CSS bảng nào được áp dụng. |
+| `ImageUploadNode` | Placeholder cho một lượt upload chưa hoàn tất. Hiếm gặp trong nội dung đã lưu, và bị `content.css` ẩn đi trên trang, nhưng tài liệu chứa nó vẫn phải parse được. |
+| `TableOfContents` | Sở hữu attribute `id` và `data-toc-id` trên heading. Bỏ nó ra thì mọi heading mất anchor, làm hỏng liên kết trong trang và mọi mục lục bạn render kèm. |
+
+`generateHTML` serialize thông qua DOM, nên trên server nó cần một DOM — hãy cài
+`jsdom` hoặc `happy-dom` và gán `globalThis.document` trước khi gọi. Đó là yêu
+cầu của Tiptap, không phải của kinkin. (Với jsdom bạn sẽ thấy một cảnh báo
+`HTMLCanvasElement's getContext() method`: nó đến từ bước dò hỗ trợ của extension
+emoji, và extension này chuyển đúng sang emoji dạng ảnh.)
+
+### `content.css`
+
+Nửa dành cho hiển thị. Chỉ gồm các rule cho nội dung — không thanh công cụ, menu,
+vùng chọn hay phần kéo-thả, không tiện ích Tailwind, không khối `@theme` và không
+reset — và mọi rule đều đến từ cùng một nguồn với rule của editor, nên trang đã
+render và editor không thể trông khác nhau.
+
+Ba đặc điểm đáng biết:
+
+**Nó được giới hạn trong một class bạn tự chọn.** Không gì được style cho tới khi
+bạn đặt `kinkin-content` (được export dưới tên `CONTENT_SCOPE_CLASS`) lên phần
+tử. Cỡ chữ, font và màu chữ đều được kế thừa chứ không bao giờ được gán — mọi
+kích thước đều tính bằng `em`, nên nội dung co giãn theo những gì trang của bạn
+cấp cho nó.
+
+**Nó nằm trong một cascade layer.** Mọi thứ đều ở trong `@layer kinkin-content`.
+CSS không thuộc layer nào luôn thắng CSS trong layer bất kể độ đặc hiệu, nên rule
+của bạn thắng mà không cần `!important` hay mẹo về specificity:
+
+```css
+/* Không thuộc layer nào, nên rule này thắng content.css — selector không cần
+   đặc hiệu hơn selector mà nó ghi đè. */
+.kinkin-content h1 { font-size: 2.5rem; }
+```
+
+**Mọi màu đều là một biến `--tt-core-*`, và stylesheet không khai báo biến nào
+trong số đó.** Mỗi màu là một `var()` với giá trị mặc định làm fallback, nên đặt
+một token ở bất kỳ đâu phía trên phần tử nội dung là đủ để đổi theme cho nó —
+kể cả chế độ tối:
+
+```css
+html.dark {
+  --tt-core-code-bg: #232733;
+  --tt-core-code-text: #e6e8ec;
+  --tt-core-codeblock-bg: #1b1f27;
+  --tt-core-blockquote: #5b6472;
+  --tt-core-link: #7ebcfd;
+  --tt-core-horizontal-line: #2b303a;
+  --tt-core-table-border: #2b303a;
+  --tt-core-table-header-bg: #1b1f27;
+  --tt-core-table-stripe-bg: #191c23;
+  --tt-core-tasklist-bg: #232733;
+  --tt-core-tasklist-border: #5b6472;
+}
+```
+
+(Đây là lý do stylesheet không khai báo giá trị mặc định ngay trên
+`.kinkin-content`: một custom property được kế thừa sẽ được quyết định bởi độ gần
+chứ không phải độ đặc hiệu, nên một khai báo trên phần tử nội dung sẽ âm thầm
+thắng khai báo trên `html.dark`.)
+
+Hai quyết định chỉ dành cho hiển thị: checkbox của danh sách công việc được render
+nhưng không bấm được — một trang tĩnh không có chỗ nào để lưu cú bấm — và
+placeholder `imageUpload` bị ẩn.
+
+Một ràng buộc: phần tử phạm vi có `white-space: pre-wrap`, giống editor, nên các
+chuỗi khoảng trắng mà tác giả gõ vào được giữ nguyên. Đừng format hay thụt lề lại
+HTML sinh ra bên trong nó — phần thụt lề đó sẽ hiện ra.
 
 ---
 
@@ -312,6 +428,8 @@ Bỏ nó đi thì các nút AI thành vô tác dụng, kèm một cảnh báo tr
 | `useAiAssistStream(editor, options)` | Hook đứng sau AI Assist, dùng khi bạn tự lắp editor của mình. |
 | `getEditorPortalRoot()` | Container có phạm vi mà UI portal render vào. |
 | `EDITOR_SCOPE_CLASS` | `"kinkin-editor"` — class phạm vi, dùng để gắn cho portal của riêng bạn. |
+| `createContentExtensions()` | Danh sách extension chỉ gồm schema, dùng để render tài liệu đã lưu. Cũng có tại `@blakaa/kinkin-editor/content`. |
+| `CONTENT_SCOPE_CLASS` | `"kinkin-content"` — class mà `content.css` giới hạn phạm vi vào. |
 | `<ToCItem />`, `<ToCEmptyState />` | Các mảnh ghép tạo nên `<ToC />`, nếu bạn muốn tự dựng bố cục mục lục. |
 | Types | `RichTextEditorProps`, `EditorImageUploadHandler`, `StreamCompletionFn`, `StreamCompletionParams` |
 
@@ -390,6 +508,22 @@ Có thứ gì đó đang render chúng bên ngoài container có phạm vi. Hãy
 
 Lẽ ra không nên — đó chính là điều mà việc giới hạn phạm vi ngăn chặn. Nếu điều đó
 xảy ra thì đây là một lỗi đáng được báo cáo.
+
+### `RangeError: Unknown node type` khi render JSON đã lưu
+
+Danh sách extension bạn truyền cho `generateHTML` không bao phủ hết tài liệu.
+Hãy truyền `createContentExtensions()` từ `@blakaa/kinkin-editor/content` thay vì
+một danh sách tự viết tay — đó chính là schema mà editor đang chạy, nên nó luôn
+đúng khi editor có thêm node mới. Xem
+[Render nội dung đã lưu mà không cần editor](#render-nội-dung-đã-lưu-mà-không-cần-editor).
+
+### Nội dung đã render không có style, hoặc bảng tràn khỏi trang
+
+Hãy import `@blakaa/kinkin-editor/content.css` và đặt `kinkin-content` lên phần
+tử chứa HTML — không gì trong stylesheet đó được áp dụng nếu thiếu class. Nếu vấn
+đề đúng là bảng bị tràn, thì HTML đã được sinh ra bằng extension `Table` thuần
+thay vì extension trong `createContentExtensions()`, vốn sinh ra container cuộn
+mà CSS cần.
 
 ---
 

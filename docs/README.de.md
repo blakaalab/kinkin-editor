@@ -63,6 +63,8 @@ Aufgabenliste, Zitat, Code, Emoji, Tabelle, Bild, Trennlinie.
   korrigieren, vereinfachen, kürzen, erweitern, übersetzen, Tonfall ändern oder ein
   eigener Prompt
 - Inhaltsverzeichnis über `onTocItemsChange`
+- Gespeicherte Dokumente ohne den Editor rendern — eine Extension-Liste nur mit
+  dem Schema und ein reines Darstellungs-Stylesheet, beide separat veröffentlicht
 - Feste Toolbar, über der Auswahl schwebende Toolbar und mobile Toolbar
 - TypeScript-Typen enthalten; läuft mit React 18 und 19
 
@@ -190,8 +192,123 @@ nutzt einen eigenen `--tt-core-*`-Namensraum, der genauso überschrieben wird:
   --tt-core-table-header-bg: #fafafa;
   --tt-core-link: #2563eb;
   --tt-core-selection: #dbeafe;
+  --tt-core-selection-text: #1f2937;  /* markierter Text; standardmäßig --color-foreground */
 }
 ```
+
+---
+
+## Gespeicherte Inhalte ohne den Editor rendern
+
+Ein gespeichertes Dokument ist Tiptap-JSON, und um es auf einer öffentlichen
+Seite zu rendern, braucht man zwei Dinge, für die das Editor-Bundle die falsche
+Quelle ist: das Schema und das Content-CSS. Beides wird separat veröffentlicht.
+
+```tsx
+// Eine Server Component. Kein React-Editor, kein Editor-Stylesheet, keine Browser-APIs.
+import { generateHTML } from "@tiptap/core";
+import { CONTENT_SCOPE_CLASS, createContentExtensions } from "@blakaa/kinkin-editor/content";
+import "@blakaa/kinkin-editor/content.css";
+
+export function Post({ doc }: { doc: JSONContent }) {
+  const html = generateHTML(doc, createContentExtensions());
+
+  return (
+    <article
+      className={CONTENT_SCOPE_CLASS}
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  );
+}
+```
+
+### `createContentExtensions()`
+
+Alle Extensions, die das Dokument formen — Nodes, Marks und die Attribute darauf
+— und nichts, was es nur gibt, damit das Editieren funktioniert.
+`<RichTextEditor />` baut seine eigene Liste auf dieser auf und hängt Node Views
+und Commands über den Namen an. Beide können also nicht auseinanderlaufen: eine
+Node, die für den Editor hinzukommt, ist eine Node, die diese Liste bereits
+rendert.
+
+Das ist die Liste für `generateHTML`, `generateJSON` oder `getSchema`. Zu
+vermeiden ist, die Extensions des Editors von Hand nachzubauen: ein Dokument mit
+einer Node, die deine Liste nicht kennt, wirft
+`RangeError: Unknown node type` — und zwar für die Leser, in der Produktion, bei
+genau dem Beitrag, der zufällig die neue Node benutzt hat.
+
+Drei Einträge wirken überraschend und sind alle drei tragend:
+
+| Eintrag | Warum er hier steht |
+| --- | --- |
+| `ContentTable` | Gibt `.table-node-wrapper > .table-scroll-container` um die Tabelle aus — genau das, was die Node View beim Editieren aufbaut. Ohne ihn läuft eine breite Tabelle über die Seite hinaus und kein einziges Tabellen-CSS greift. |
+| `ImageUploadNode` | Der Platzhalter für einen Upload, der nie fertig wurde. In gespeicherten Inhalten selten, und auf der Seite von `content.css` ausgeblendet — aber ein Dokument, das ihn enthält, muss sich trotzdem parsen lassen. |
+| `TableOfContents` | Verantwortet die Attribute `id` und `data-toc-id` an Überschriften. Lässt man sie weg, verliert jede Überschrift ihren Anker; Sprungmarken und jedes Inhaltsverzeichnis, das du daneben renderst, gehen kaputt. |
+
+`generateHTML` serialisiert über das DOM, braucht auf einem Server also eines:
+Installiere `jsdom` oder `happy-dom` und setze `globalThis.document` vor dem
+Aufruf. Das ist eine Anforderung von Tiptap, nicht von kinkin. (Mit jsdom siehst
+du eine `HTMLCanvasElement's getContext() method`-Warnung: Sie stammt aus der
+Support-Prüfung der Emoji-Extension, die korrekt auf Bild-Emoji zurückfällt.)
+
+### `content.css`
+
+Die Darstellungshälfte. Nur Content-Regeln — keine Toolbars, Menüs, Auswahl- oder
+Drag-Elemente, keine Tailwind-Utilities, kein `@theme`-Block und kein Reset — und
+jede Regel stammt aus derselben Quelle wie die des Editors. Eine gerenderte Seite
+und der Editor können also nicht unterschiedlich aussehen.
+
+Drei Eigenschaften, die man kennen sollte:
+
+**Sie ist auf eine einzige Klasse begrenzt, die du selbst setzt.** Nichts wird
+gestylt, bevor `kinkin-content` (exportiert als `CONTENT_SCOPE_CLASS`) am Element
+steht. Schriftgröße, -familie und Textfarbe werden geerbt, nie gesetzt — jedes
+Maß steht in `em`, der Inhalt skaliert also mit dem, was deine Seite ihm vorgibt.
+
+**Sie liegt in einem Cascade Layer.** Alles steht in `@layer kinkin-content`.
+CSS ohne Layer schlägt einen Layer unabhängig von der Spezifität, deine eigenen
+Regeln setzen sich also ohne `!important` und ohne Spezifitätsspielchen durch:
+
+```css
+/* Ohne Layer, also gewinnt das gegen content.css — der Selektor muss nicht
+   spezifischer sein als der, den er überschreibt. */
+.kinkin-content h1 { font-size: 2.5rem; }
+```
+
+**Jede Farbe ist eine `--tt-core-*`-Variable, und das Stylesheet deklariert
+keine davon.** Jede ist ein `var()` mit ihrem Standardwert als Fallback: Ein
+Token irgendwo oberhalb des Content-Elements zu setzen, thematisiert es also —
+Dark Mode eingeschlossen:
+
+```css
+html.dark {
+  --tt-core-code-bg: #232733;
+  --tt-core-code-text: #e6e8ec;
+  --tt-core-codeblock-bg: #1b1f27;
+  --tt-core-blockquote: #5b6472;
+  --tt-core-link: #7ebcfd;
+  --tt-core-horizontal-line: #2b303a;
+  --tt-core-table-border: #2b303a;
+  --tt-core-table-header-bg: #1b1f27;
+  --tt-core-table-stripe-bg: #191c23;
+  --tt-core-tasklist-bg: #232733;
+  --tt-core-tasklist-border: #5b6472;
+}
+```
+
+(Deshalb deklariert das Stylesheet auf `.kinkin-content` selbst keine
+Standardwerte: Eine geerbte Custom Property wird über die Nähe aufgelöst, nicht
+über die Spezifität — eine Deklaration am Content-Element würde eine in
+`html.dark` also stillschweigend schlagen.)
+
+Zwei reine Darstellungsentscheidungen: Die Checkboxen von Aufgabenlisten werden
+gerendert, sind aber nicht klickbar — eine Seite hat nirgends Platz, den Klick zu
+speichern — und der `imageUpload`-Platzhalter wird ausgeblendet.
+
+Eine Einschränkung: Das Scope-Element hat `white-space: pre-wrap`, wie der
+Editor, damit vom Autor getippte Leerzeichenfolgen erhalten bleiben. Formatiere
+oder rücke das erzeugte HTML darin nicht ein — diese Einrückung würde mit
+gerendert.
 
 ---
 
@@ -319,6 +436,8 @@ Lässt du es weg, werden die KI-Buttons wirkungslos, mit einer Warnung in der Ko
 | `useAiAssistStream(editor, options)` | Der Hook hinter AI Assist, falls du deinen eigenen Editor zusammenbaust. |
 | `getEditorPortalRoot()` | Der Container mit Geltungsbereich, in den portaliertes UI rendert. |
 | `EDITOR_SCOPE_CLASS` | `"kinkin-editor"` — die Scope-Klasse, um eigene Portale zu kennzeichnen. |
+| `createContentExtensions()` | Die Extension-Liste nur mit dem Schema, zum Rendern gespeicherter Dokumente. Auch unter `@blakaa/kinkin-editor/content`. |
+| `CONTENT_SCOPE_CLASS` | `"kinkin-content"` — die Klasse, auf die `content.css` seine Regeln begrenzt. |
 | `<ToCItem />`, `<ToCEmptyState />` | Die Bausteine von `<ToC />`, falls du ein eigenes Gliederungs-Layout willst. |
 | Typen | `RichTextEditorProps`, `EditorImageUploadHandler`, `StreamCompletionFn`, `StreamCompletionParams` |
 
@@ -398,6 +517,23 @@ nach `getEditorPortalRoot()`.
 
 Sollten sie nicht — genau das verhindert der Geltungsbereich. Wenn es doch passiert,
 ist das ein Bug, der eine Meldung wert ist.
+
+### `RangeError: Unknown node type` beim Rendern von gespeichertem JSON
+
+Die Extension-Liste, die du an `generateHTML` übergeben hast, deckt das Dokument
+nicht ab. Übergib `createContentExtensions()` aus
+`@blakaa/kinkin-editor/content` statt einer handgeschriebenen Liste — es ist
+dasselbe Schema, das der Editor ausführt, und bleibt damit korrekt, wenn der
+Editor Nodes dazubekommt. Siehe
+[Gespeicherte Inhalte ohne den Editor rendern](#gespeicherte-inhalte-ohne-den-editor-rendern).
+
+### Gerenderte Inhalte sind ungestylt, oder Tabellen laufen über die Seite hinaus
+
+Importiere `@blakaa/kinkin-editor/content.css` und setze `kinkin-content` auf das
+Element, in das das HTML geht — ohne die Klasse greift nichts aus diesem
+Stylesheet. Wenn speziell Tabellen überlaufen, wurde das HTML mit einer normalen
+`Table`-Extension erzeugt statt mit der aus `createContentExtensions()`, die den
+Scroll-Container ausgibt, den das CSS braucht.
 
 ---
 

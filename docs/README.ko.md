@@ -60,6 +60,8 @@ npm install @blakaa/kinkin-editor
 - 스트리밍 AI Assist — 다듬기, 이어 쓰기, 요약, 문법 교정, 쉽게 쓰기, 줄이기, 늘리기,
   번역, 어조 변경, 또는 직접 작성한 프롬프트
 - `onTocItemsChange`를 통한 목차
+- 에디터 없이 저장된 문서 렌더링 — 스키마만 담은 확장 목록과 표시 전용
+  스타일시트를 각각 따로 배포
 - 고정 툴바, 선택 영역 플로팅 툴바, 모바일 툴바
 - TypeScript 타입 포함. React 18과 19 지원
 
@@ -183,8 +185,114 @@ portal로 렌더링되는 UI(메뉴, 툴팁, 드래그 미리보기, 모바일 �
   --tt-core-table-header-bg: #fafafa;
   --tt-core-link: #2563eb;
   --tt-core-selection: #dbeafe;
+  --tt-core-selection-text: #1f2937;  /* 선택된 텍스트. 기본값은 --color-foreground */
 }
 ```
+
+---
+
+## 에디터 없이 저장된 콘텐츠 렌더링하기
+
+저장된 문서는 Tiptap JSON이고, 이를 공개 페이지에 렌더링하려면 에디터 번들에서 가져오기에는
+적절하지 않은 두 가지가 필요합니다. 스키마와 콘텐츠 CSS입니다. 둘 다 별도로 배포됩니다.
+
+```tsx
+// 서버 컴포넌트. React 에디터도, 에디터 스타일시트도, 브라우저 API도 없습니다.
+import { generateHTML } from "@tiptap/core";
+import { CONTENT_SCOPE_CLASS, createContentExtensions } from "@blakaa/kinkin-editor/content";
+import "@blakaa/kinkin-editor/content.css";
+
+export function Post({ doc }: { doc: JSONContent }) {
+  const html = generateHTML(doc, createContentExtensions());
+
+  return (
+    <article
+      className={CONTENT_SCOPE_CLASS}
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  );
+}
+```
+
+### `createContentExtensions()`
+
+문서의 형태를 결정하는 모든 확장 — 노드, 마크, 그리고 거기에 붙는 속성 — 이 들어 있고,
+편집을 가능하게 하려고만 존재하는 것은 하나도 없습니다. `<RichTextEditor />`는 이 목록 위에
+자신의 목록을 쌓아 올리면서 노드 뷰와 커맨드를 이름으로 붙이므로, 둘이 어긋날 수 없습니다.
+에디터를 위해 추가한 노드는 이 목록이 이미 렌더링할 수 있는 노드입니다.
+
+`generateHTML`, `generateJSON`, `getSchema`에 넘겨야 할 목록이 바로 이것입니다. 피해야 할
+것은 에디터의 확장 목록을 손으로 옮겨 적는 일입니다. 목록이 모르는 노드가 담긴 문서는
+`RangeError: Unknown node type`을 던지는데, 그것도 독자에게, 프로덕션에서, 하필 새 노드를
+쓴 그 글에서 던집니다.
+
+의외로 보이지만 셋 다 반드시 필요한 항목입니다.
+
+| 항목 | 필요한 이유 |
+| --- | --- |
+| `ContentTable` | 표 바깥에 `.table-node-wrapper > .table-scroll-container`를 출력해, 편집 중 노드 뷰가 만드는 구조와 일치시킵니다. 이것이 없으면 넓은 표가 페이지를 넘치고 표 관련 CSS도 전혀 적용되지 않습니다. |
+| `ImageUploadNode` | 끝내 완료되지 않은 업로드의 자리표시자입니다. 저장된 콘텐츠에서는 드물고 페이지에서는 `content.css`가 숨기지만, 이를 포함한 문서도 파싱은 되어야 합니다. |
+| `TableOfContents` | 제목의 `id`와 `data-toc-id` 속성을 담당합니다. 빼면 모든 제목이 앵커를 잃어 페이지 내 링크와 함께 렌더링하는 목차가 깨집니다. |
+
+`generateHTML`은 DOM을 거쳐 직렬화하므로 서버에서는 DOM이 필요합니다. `jsdom`이나
+`happy-dom`을 설치하고 호출 전에 `globalThis.document`를 설정하세요. 이는 kinkin이 아니라
+Tiptap의 요구사항입니다. (jsdom에서는 `HTMLCanvasElement's getContext() method` 경고가 한 번
+나옵니다. emoji 확장의 지원 여부 탐지에서 나오는 것이며, 확장은 이미지 emoji로 올바르게
+폴백합니다.)
+
+### `content.css`
+
+표시를 담당하는 절반입니다. 콘텐츠 규칙만 들어 있고 — 툴바, 메뉴, 선택 영역, 드래그 관련
+요소는 없으며 Tailwind 유틸리티도, `@theme` 블록도, 리셋도 없습니다 — 모든 규칙이 에디터
+쪽과 같은 원본에서 나오므로 렌더링된 페이지와 에디터가 달라 보일 수 없습니다.
+
+알아 둘 만한 성질이 세 가지 있습니다.
+
+**적용 범위가 직접 붙이는 클래스 하나로 한정됩니다.** 요소에 `kinkin-content`
+(`CONTENT_SCOPE_CLASS`로 export)를 붙이기 전까지는 아무것도 스타일링되지 않습니다. 글자
+크기, 글꼴, 글자색은 언제나 상속될 뿐 설정되지 않습니다. 모든 치수가 `em` 단위이므로 콘텐츠는
+페이지가 주는 환경에 맞춰 함께 확대·축소됩니다.
+
+**캐스케이드 레이어 안에 있습니다.** 모든 규칙이 `@layer kinkin-content` 안에 있습니다.
+레이어에 속하지 않은 CSS는 명시도와 관계없이 레이어 안의 CSS를 이기므로, 여러분의 규칙은
+`!important`나 명시도 싸움 없이 그대로 적용됩니다.
+
+```css
+/* 어떤 레이어에도 속하지 않으므로 content.css를 이깁니다 — 선택자가 덮어쓸 대상보다
+   더 구체적일 필요가 없습니다. */
+.kinkin-content h1 { font-size: 2.5rem; }
+```
+
+**모든 색은 `--tt-core-*` 변수이며, 이 스타일시트는 그중 어느 것도 선언하지 않습니다.** 각
+색은 기본값을 폴백으로 가진 `var()`이므로, 콘텐츠 요소보다 위 어디에서든 토큰을 설정하면
+테마가 바뀝니다. 다크 모드도 마찬가지입니다.
+
+```css
+html.dark {
+  --tt-core-code-bg: #232733;
+  --tt-core-code-text: #e6e8ec;
+  --tt-core-codeblock-bg: #1b1f27;
+  --tt-core-blockquote: #5b6472;
+  --tt-core-link: #7ebcfd;
+  --tt-core-horizontal-line: #2b303a;
+  --tt-core-table-border: #2b303a;
+  --tt-core-table-header-bg: #1b1f27;
+  --tt-core-table-stripe-bg: #191c23;
+  --tt-core-tasklist-bg: #232733;
+  --tt-core-tasklist-border: #5b6472;
+}
+```
+
+(스타일시트가 `.kinkin-content` 자체에 기본값을 선언하지 않는 이유가 이것입니다. 상속되는
+커스텀 속성은 명시도가 아니라 가까움으로 결정되므로, 콘텐츠 요소에 붙인 선언이 `html.dark`의
+선언을 조용히 이겨 버립니다.)
+
+표시 전용 결정이 두 가지 있습니다. 작업 목록 체크박스는 렌더링되지만 클릭할 수 없고 — 페이지
+에는 그 클릭을 저장할 곳이 없습니다 — `imageUpload` 자리표시자는 숨겨집니다.
+
+제약이 하나 있습니다. 스코프 요소는 에디터와 마찬가지로 `white-space: pre-wrap`이므로 작성자가
+입력한 연속 공백이 그대로 남습니다. 그 안에서 생성된 HTML을 정렬하거나 들여쓰지 마세요. 그
+들여쓰기가 그대로 화면에 나옵니다.
 
 ---
 
@@ -310,6 +418,8 @@ const streamCompletion: StreamCompletionFn = async ({
 | `useAiAssistStream(editor, options)` | AI Assist 뒤에 있는 hook. 에디터를 직접 조립할 때 사용합니다. |
 | `getEditorPortalRoot()` | portal UI가 렌더링되는 스코프 컨테이너. |
 | `EDITOR_SCOPE_CLASS` | `"kinkin-editor"` — 스코프 클래스. 직접 만든 portal에 붙일 때 씁니다. |
+| `createContentExtensions()` | 저장된 문서를 렌더링하기 위한 스키마 전용 확장 목록. `@blakaa/kinkin-editor/content`에서도 가져올 수 있습니다. |
+| `CONTENT_SCOPE_CLASS` | `"kinkin-content"` — `content.css`가 적용 범위로 삼는 클래스. |
 | `<ToCItem />`, `<ToCEmptyState />` | `<ToC />`를 이루는 조각들. 목차 레이아웃을 직접 만들 때 사용합니다. |
 | 타입 | `RichTextEditorProps`, `EditorImageUploadHandler`, `StreamCompletionFn`, `StreamCompletionParams` |
 
@@ -388,6 +498,20 @@ portal 하세요.
 
 그럴 리 없습니다. 스코프 분리가 바로 그것을 막기 위한 장치입니다. 그런 일이 생겼다면
 제보할 가치가 있는 버그입니다.
+
+### 저장된 JSON을 렌더링할 때 `RangeError: Unknown node type`
+
+`generateHTML`에 넘긴 확장 목록이 문서를 전부 다루지 못합니다. 직접 작성한 목록 대신
+`@blakaa/kinkin-editor/content`의 `createContentExtensions()`를 넘기세요. 에디터가 실제로
+돌리는 바로 그 스키마이므로 에디터에 노드가 늘어나도 계속 올바릅니다.
+[에디터 없이 저장된 콘텐츠 렌더링하기](#에디터-없이-저장된-콘텐츠-렌더링하기)를 참고하세요.
+
+### 렌더링된 콘텐츠에 스타일이 없거나 표가 페이지를 넘칩니다
+
+`@blakaa/kinkin-editor/content.css`를 import하고 HTML이 들어가는 요소에 `kinkin-content`를
+붙이세요. 이 클래스가 없으면 해당 스타일시트의 어떤 규칙도 적용되지 않습니다. 넘치는 것이
+표라면, 그 HTML은 `createContentExtensions()`의 확장이 아니라 일반 `Table` 확장으로 생성된
+것입니다. 전자는 CSS가 필요로 하는 스크롤 컨테이너를 출력합니다.
 
 ---
 

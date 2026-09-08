@@ -62,6 +62,8 @@ numerada, Lista de tarefas, Citação, Código, Emoji, Tabela, Imagem, Linha hor
 - AI Assist com streaming — melhorar, continuar, resumir, corrigir gramática,
   simplificar, encurtar, ampliar, traduzir, mudar o tom ou um prompt próprio
 - Sumário via `onTocItemsChange`
+- Renderize documentos salvos sem o editor — uma lista de extensões só com o
+  schema e uma folha de estilos só de exibição, ambas publicadas separadamente
 - Barras de ferramentas fixa, flutuante sobre a seleção e mobile
 - Tipos TypeScript inclusos; funciona com React 18 e 19
 
@@ -189,8 +191,121 @@ citações) usa um namespace separado, `--tt-core-*`, sobrescrito da mesma forma
   --tt-core-table-header-bg: #fafafa;
   --tt-core-link: #2563eb;
   --tt-core-selection: #dbeafe;
+  --tt-core-selection-text: #1f2937;  /* texto selecionado; por padrão usa --color-foreground */
 }
 ```
+
+---
+
+## Renderizando conteúdo salvo sem o editor
+
+Um documento salvo é JSON do Tiptap, e renderizá-lo numa página pública exige
+duas coisas que o bundle do editor não é o lugar certo para obter: o schema e o
+CSS do conteúdo. Ambos são publicados separadamente.
+
+```tsx
+// Um server component. Sem editor React, sem a folha de estilos do editor, sem APIs do navegador.
+import { generateHTML } from "@tiptap/core";
+import { CONTENT_SCOPE_CLASS, createContentExtensions } from "@blakaa/kinkin-editor/content";
+import "@blakaa/kinkin-editor/content.css";
+
+export function Post({ doc }: { doc: JSONContent }) {
+  const html = generateHTML(doc, createContentExtensions());
+
+  return (
+    <article
+      className={CONTENT_SCOPE_CLASS}
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  );
+}
+```
+
+### `createContentExtensions()`
+
+Todas as extensões que dão forma ao documento — nós, marcas e os atributos que
+eles carregam — e nada que exista apenas para o editar funcionar.
+`<RichTextEditor />` monta a própria lista em cima desta, ligando node views e
+comandos pelo nome, de modo que as duas não podem divergir: um nó adicionado para
+o editor é um nó que esta lista já renderiza.
+
+É a lista para passar a `generateHTML`, `generateJSON` ou `getSchema`. O que se
+deve evitar é espelhar à mão as extensões do editor: um documento que contenha um
+nó que a sua lista não conhece lança `RangeError: Unknown node type` — e lança
+para os leitores, em produção, justamente no post que por acaso usou o nó novo.
+
+Três entradas parecem surpreendentes e todas são indispensáveis:
+
+| Entrada | Por que está aqui |
+| --- | --- |
+| `ContentTable` | Emite `.table-node-wrapper > .table-scroll-container` em volta da tabela, igual ao que o node view monta durante a edição. Sem ela uma tabela larga transborda a página e nenhum CSS de tabela é aplicado. |
+| `ImageUploadNode` | O placeholder de um upload que nunca terminou. É raro em conteúdo salvo, e o `content.css` o esconde na página, mas um documento que o contenha ainda precisa ser parseado. |
+| `TableOfContents` | É a dona dos atributos `id` e `data-toc-id` nos títulos. Deixe-a de fora e todo título perde a âncora, quebrando links internos e qualquer sumário que você renderize ao lado. |
+
+`generateHTML` serializa através do DOM, então num servidor ele precisa de um:
+instale `jsdom` ou `happy-dom` e defina `globalThis.document` antes de chamá-lo.
+Isso é um requisito do Tiptap, não do kinkin. (Com o jsdom você verá um aviso de
+`HTMLCanvasElement's getContext() method`: ele vem da sondagem de suporte da
+extensão de emoji, que corretamente recorre aos emoji em imagem.)
+
+### `content.css`
+
+A metade de exibição. Apenas regras de conteúdo — sem barras de ferramentas,
+menus, seleção ou elementos de arraste, sem utilitários do Tailwind, sem bloco
+`@theme` e sem reset — e toda regra vem da mesma fonte que as do editor, então
+uma página renderizada e o editor não podem ficar diferentes.
+
+Três propriedades que vale conhecer:
+
+**Ela é limitada a uma única classe que você adiciona.** Nada recebe estilo até
+você colocar `kinkin-content` (exportada como `CONTENT_SCOPE_CLASS`) no elemento.
+Tamanho da fonte, família e cor do texto são herdados, nunca definidos — cada
+medida está em `em`, então o conteúdo escala junto com o que a sua página lhe der.
+
+**Ela fica dentro de uma cascade layer.** Tudo está dentro de
+`@layer kinkin-content`. CSS fora de qualquer layer vence um layer
+independentemente da especificidade, então as suas próprias regras prevalecem sem
+`!important` nem jogos de especificidade:
+
+```css
+/* Fora de layer, então isto vence o content.css — o seletor não precisa ser mais
+   específico do que aquele que está sobrescrevendo. */
+.kinkin-content h1 { font-size: 2.5rem; }
+```
+
+**Toda cor é uma variável `--tt-core-*`, e a folha não declara nenhuma delas.**
+Cada uma é um `var()` com o valor padrão como fallback, então definir um token em
+qualquer ponto acima do elemento de conteúdo já o tematiza — inclusive um modo
+escuro:
+
+```css
+html.dark {
+  --tt-core-code-bg: #232733;
+  --tt-core-code-text: #e6e8ec;
+  --tt-core-codeblock-bg: #1b1f27;
+  --tt-core-blockquote: #5b6472;
+  --tt-core-link: #7ebcfd;
+  --tt-core-horizontal-line: #2b303a;
+  --tt-core-table-border: #2b303a;
+  --tt-core-table-header-bg: #1b1f27;
+  --tt-core-table-stripe-bg: #191c23;
+  --tt-core-tasklist-bg: #232733;
+  --tt-core-tasklist-border: #5b6472;
+}
+```
+
+(É por isso que a folha não declara padrões no próprio `.kinkin-content`: uma
+custom property herdada é resolvida por proximidade, não por especificidade,
+então uma declaração no elemento de conteúdo venceria silenciosamente uma posta
+em `html.dark`.)
+
+Duas decisões só de exibição: as caixas de seleção das listas de tarefas são
+renderizadas mas não são clicáveis — uma página não tem onde salvar o clique — e
+o placeholder de `imageUpload` fica escondido.
+
+Uma restrição: o elemento de escopo usa `white-space: pre-wrap`, igual ao editor,
+então as sequências de espaços que o autor digitou sobrevivem. Não formate nem
+indente o HTML gerado dentro dele — essa indentação apareceria na renderização.
 
 ---
 
@@ -317,6 +432,8 @@ Se você omitir, os botões de IA viram no-ops, com um aviso no console.
 | `useAiAssistStream(editor, options)` | O hook por trás do AI Assist, caso você monte o seu próprio editor. |
 | `getEditorPortalRoot()` | O container com escopo onde a UI de portais é renderizada. |
 | `EDITOR_SCOPE_CLASS` | `"kinkin-editor"` — a classe de escopo, para marcar os seus próprios portais. |
+| `createContentExtensions()` | A lista de extensões só com o schema, para renderizar documentos salvos. Também em `@blakaa/kinkin-editor/content`. |
+| `CONTENT_SCOPE_CLASS` | `"kinkin-content"` — a classe à qual o `content.css` limita suas regras. |
 | `<ToCItem />`, `<ToCEmptyState />` | As peças que formam o `<ToC />`, se você quiser o seu próprio layout de sumário. |
 | Tipos | `RichTextEditorProps`, `EditorImageUploadHandler`, `StreamCompletionFn`, `StreamCompletionParams` |
 
@@ -396,6 +513,22 @@ portal para `getEditorPortalRoot()`.
 
 Não deveriam — é exatamente isso que o escopo previne. Se acontecer, é um bug que
 vale reportar.
+
+### `RangeError: Unknown node type` ao renderizar JSON salvo
+
+A lista de extensões que você passou para `generateHTML` não cobre o documento.
+Passe `createContentExtensions()` de `@blakaa/kinkin-editor/content` em vez de uma
+lista escrita à mão — é o mesmo schema que o editor executa, então ela continua
+correta conforme o editor ganha nós. Veja
+[Renderizando conteúdo salvo sem o editor](#renderizando-conteúdo-salvo-sem-o-editor).
+
+### O conteúdo renderizado está sem estilo, ou as tabelas transbordam a página
+
+Importe `@blakaa/kinkin-editor/content.css` e coloque `kinkin-content` no elemento
+onde o HTML entra — nada dessa folha se aplica sem a classe. Se o que transborda
+são especificamente as tabelas, o HTML foi gerado com uma extensão `Table` comum
+em vez da que está em `createContentExtensions()`, que emite o contêiner de
+rolagem de que o CSS precisa.
 
 ---
 

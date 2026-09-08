@@ -62,6 +62,8 @@ Liste de tâches, Citation, Code, Emoji, Tableau, Image, Ligne horizontale.
 - AI Assist en streaming — améliorer, continuer, résumer, corriger la grammaire,
   simplifier, raccourcir, développer, traduire, changer de ton, ou un prompt libre
 - Table des matières via `onTocItemsChange`
+- Rendu des documents enregistrés sans l'éditeur — une liste d'extensions réduite
+  au schéma et une feuille de styles d'affichage seul, toutes deux publiées à part
 - Barres d'outils fixe, flottante sur la sélection et mobile
 - Types TypeScript inclus ; compatible React 18 et 19
 
@@ -192,8 +194,128 @@ même manière :
   --tt-core-table-header-bg: #fafafa;
   --tt-core-link: #2563eb;
   --tt-core-selection: #dbeafe;
+  --tt-core-selection-text: #1f2937;  /* texte sélectionné ; reprend --color-foreground par défaut */
 }
 ```
+
+---
+
+## Afficher du contenu enregistré sans l'éditeur
+
+Un document enregistré est du JSON Tiptap, et l'afficher sur une page publique
+demande deux choses que le bundle de l'éditeur n'est pas le bon endroit où
+prendre : le schéma et le CSS du contenu. Les deux sont publiés séparément.
+
+```tsx
+// Un server component. Pas d'éditeur React, pas de feuille de styles de l'éditeur, pas d'API navigateur.
+import { generateHTML } from "@tiptap/core";
+import { CONTENT_SCOPE_CLASS, createContentExtensions } from "@blakaa/kinkin-editor/content";
+import "@blakaa/kinkin-editor/content.css";
+
+export function Post({ doc }: { doc: JSONContent }) {
+  const html = generateHTML(doc, createContentExtensions());
+
+  return (
+    <article
+      className={CONTENT_SCOPE_CLASS}
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  );
+}
+```
+
+### `createContentExtensions()`
+
+Toutes les extensions qui donnent sa forme au document — nœuds, marques et les
+attributs qu'ils portent — et rien de ce qui n'existe que pour faire fonctionner
+l'édition. `<RichTextEditor />` construit sa propre liste par-dessus celle-ci, en
+rattachant les node views et les commandes par nom, si bien que les deux ne
+peuvent pas diverger : un nœud ajouté pour l'éditeur est un nœud que cette liste
+sait déjà afficher.
+
+C'est la liste à passer à `generateHTML`, `generateJSON` ou `getSchema`. Ce qu'il
+faut éviter, c'est de recopier à la main les extensions de l'éditeur : un
+document contenant un nœud que votre liste ne connaît pas lève
+`RangeError: Unknown node type` — et il le lève pour les lecteurs, en production,
+sur l'article qui a justement utilisé le nouveau nœud.
+
+Trois entrées paraissent surprenantes et sont toutes indispensables :
+
+| Entrée | Pourquoi elle est là |
+| --- | --- |
+| `ContentTable` | Émet `.table-node-wrapper > .table-scroll-container` autour du tableau, à l'identique de ce que construit la node view pendant l'édition. Sans elle, un tableau large déborde de la page et aucun CSS de tableau ne s'applique. |
+| `ImageUploadNode` | Le marqueur d'un envoi qui n'a jamais abouti. Rare dans du contenu enregistré, et masqué sur la page par `content.css`, mais un document qui en contient un doit tout de même pouvoir être analysé. |
+| `TableOfContents` | Porte les attributs `id` et `data-toc-id` sur les titres. Retirez-la et chaque titre perd son ancre, ce qui casse les liens internes et tout sommaire que vous affichez à côté. |
+
+`generateHTML` sérialise en passant par le DOM : sur un serveur il lui en faut
+donc un. Installez `jsdom` ou `happy-dom` et définissez `globalThis.document`
+avant l'appel. C'est une exigence de Tiptap, pas de kinkin. (Avec jsdom vous
+verrez un avertissement `HTMLCanvasElement's getContext() method` : il vient du
+test de prise en charge de l'extension emoji, qui bascule correctement sur les
+emoji en image.)
+
+### `content.css`
+
+La moitié affichage. Uniquement des règles de contenu — ni barres d'outils, ni
+menus, ni sélection, ni éléments de glisser-déposer, pas d'utilitaires Tailwind,
+pas de bloc `@theme` et pas de reset — et chaque règle vient de la même source
+que celles de l'éditeur : une page affichée et l'éditeur ne peuvent donc pas se
+ressembler différemment.
+
+Trois propriétés qu'il vaut mieux connaître :
+
+**Elle est limitée à une seule classe que vous ajoutez vous-même.** Rien n'est
+stylé tant que vous n'avez pas mis `kinkin-content` (exportée sous le nom
+`CONTENT_SCOPE_CLASS`) sur l'élément. La taille de police, la famille et la
+couleur du texte sont héritées, jamais fixées — toutes les mesures sont en `em`,
+donc le contenu s'adapte à ce que votre page lui donne.
+
+**Elle est dans une cascade layer.** Tout se trouve dans
+`@layer kinkin-content`. Le CSS hors de toute couche l'emporte sur une couche,
+quelle que soit la spécificité : vos propres règles passent donc sans
+`!important` ni bataille de spécificité.
+
+```css
+/* Hors couche, donc ceci l'emporte sur content.css — le sélecteur n'a pas besoin
+   d'être plus spécifique que celui qu'il surcharge. */
+.kinkin-content h1 { font-size: 2.5rem; }
+```
+
+**Chaque couleur est une variable `--tt-core-*`, et la feuille n'en déclare
+aucune.** Chacune est un `var()` avec sa valeur par défaut en fallback : définir
+un token n'importe où au-dessus de l'élément de contenu suffit donc à le
+thématiser — mode sombre compris :
+
+```css
+html.dark {
+  --tt-core-code-bg: #232733;
+  --tt-core-code-text: #e6e8ec;
+  --tt-core-codeblock-bg: #1b1f27;
+  --tt-core-blockquote: #5b6472;
+  --tt-core-link: #7ebcfd;
+  --tt-core-horizontal-line: #2b303a;
+  --tt-core-table-border: #2b303a;
+  --tt-core-table-header-bg: #1b1f27;
+  --tt-core-table-stripe-bg: #191c23;
+  --tt-core-tasklist-bg: #232733;
+  --tt-core-tasklist-border: #5b6472;
+}
+```
+
+(C'est pour cela que la feuille ne déclare aucune valeur par défaut sur
+`.kinkin-content` lui-même : une custom property héritée se résout par
+proximité et non par spécificité, donc une déclaration posée sur l'élément de
+contenu l'emporterait silencieusement sur une déclaration faite dans
+`html.dark`.)
+
+Deux décisions propres à l'affichage : les cases des listes de tâches sont
+affichées mais non cliquables — une page n'a nulle part où enregistrer le clic —
+et le marqueur `imageUpload` est masqué.
+
+Une contrainte : l'élément de portée est en `white-space: pre-wrap`, comme
+l'éditeur, si bien que les suites d'espaces saisies par l'auteur sont conservées.
+N'indentez pas et ne reformatez pas le HTML généré à l'intérieur — cette
+indentation s'afficherait.
 
 ---
 
@@ -321,6 +443,8 @@ Omettez-le et les boutons IA deviennent inertes, avec un avertissement en consol
 | `useAiAssistStream(editor, options)` | Le hook derrière AI Assist, si vous composez votre propre éditeur. |
 | `getEditorPortalRoot()` | Le conteneur à portée dans lequel l'interface des portails est rendue. |
 | `EDITOR_SCOPE_CLASS` | `"kinkin-editor"` — la classe de portée, pour marquer vos propres portails. |
+| `createContentExtensions()` | La liste d'extensions réduite au schéma, pour afficher des documents enregistrés. Également sur `@blakaa/kinkin-editor/content`. |
+| `CONTENT_SCOPE_CLASS` | `"kinkin-content"` — la classe à laquelle `content.css` limite ses règles. |
 | `<ToCItem />`, `<ToCEmptyState />` | Les pièces qui composent `<ToC />`, si vous voulez votre propre mise en page de sommaire. |
 | Types | `RichTextEditorProps`, `EditorImageUploadHandler`, `StreamCompletionFn`, `StreamCompletionParams` |
 
@@ -401,6 +525,23 @@ Quelque chose les rend en dehors du conteneur à portée. Envoyez-les par portai
 
 Cela ne devrait pas arriver — c'est précisément ce que la mise à portée empêche. Si
 cela se produit, c'est un bug qui mérite d'être signalé.
+
+### `RangeError: Unknown node type` à l'affichage d'un JSON enregistré
+
+La liste d'extensions passée à `generateHTML` ne couvre pas le document. Passez
+`createContentExtensions()` depuis `@blakaa/kinkin-editor/content` plutôt qu'une
+liste écrite à la main : c'est le schéma que l'éditeur exécute réellement, elle
+reste donc correcte à mesure que l'éditeur gagne des nœuds. Voir
+[Afficher du contenu enregistré sans l'éditeur](#afficher-du-contenu-enregistré-sans-léditeur).
+
+### Le contenu affiché n'a pas de styles, ou les tableaux débordent de la page
+
+Importez `@blakaa/kinkin-editor/content.css` et mettez `kinkin-content` sur
+l'élément qui reçoit le HTML — rien dans cette feuille ne s'applique sans la
+classe. Si ce sont précisément les tableaux qui débordent, le HTML a été généré
+avec une extension `Table` ordinaire au lieu de celle de
+`createContentExtensions()`, qui émet le conteneur de défilement dont le CSS a
+besoin.
 
 ---
 
