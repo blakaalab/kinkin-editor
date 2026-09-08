@@ -44,6 +44,9 @@
     width: 1.25em;
     height: 1.25em;
     vertical-align: -0.25em;
+    // Emoji are images too, so the block-image margin above would otherwise
+    // apply to them — vertical margins do affect inline replaced elements.
+    margin: 0;
     cursor: text;
   }
 

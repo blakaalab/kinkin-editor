@@ -1,10 +1,29 @@
 @use "../../styles/tokens" as t;
 
 @mixin content {
+  // `display: block` because the library ships no reset: left as the UA's
+  // inline default, an image sits on a text baseline, which adds a few pixels
+  // of descender space under it and makes the margins below behave oddly.
+  //
+  // The margin is the image's own, rather than borrowed from whatever follows
+  // it. Headings set `margin-bottom: 0`, so an image under a heading used to
+  // sit flush against it, and two images in a row had nothing between them.
+  // 1.125em matches the rhythm blockquotes, lists and code blocks use, and
+  // collapses with a neighbour's margin rather than adding to it.
   img {
+    display: block;
     width: 100%;
     height: auto;
     border-radius: 0.375rem;
+    margin: 1.125em 0;
+
+    &:first-child {
+      margin-top: 0;
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+    }
   }
 }
 
