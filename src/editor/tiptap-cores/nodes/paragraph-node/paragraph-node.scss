@@ -115,6 +115,14 @@
     cursor: col-resize;
   }
 
+  // Positioned so the placeholder below resolves against this paragraph. Without
+  // it the nearest positioned ancestor is the top-level block, and a placeholder
+  // inside a column or a quote is drawn at that block's top-left corner instead
+  // of where the caret actually is.
+  .is-empty[data-placeholder]:has(> .ProseMirror-trailingBreak:only-child) {
+    position: relative;
+  }
+
   .is-empty[data-placeholder]:has(
       > .ProseMirror-trailingBreak:only-child
     )::before {

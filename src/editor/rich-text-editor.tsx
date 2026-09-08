@@ -116,8 +116,17 @@ const createExtensions = (
 
   DropGuard,
   Placeholder.configure({
-    placeholder: "Write, type '/' for commands…",
+    // The full hint does not fit a column, and reads as clutter three times
+    // over in a row of them.
+    placeholder: ({ editor, pos }) =>
+      editor.state.doc.resolve(pos).parent.type.name === "column"
+        ? "Write something…"
+        : "Write, type '/' for commands…",
     emptyNodeClass: "is-empty",
+    // Without this the plugin only visits top-level nodes, so an empty
+    // paragraph nested in a column (or a quote, or a list item) never gets a
+    // placeholder. `showOnlyCurrent` still keeps it to the node the caret is in.
+    includeChildren: true,
   }),
   Selection,
   Typography,

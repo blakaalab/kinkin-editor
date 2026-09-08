@@ -29,6 +29,7 @@
   @include paragraph.content;
   @include table.content;
 
+  @include column.editor;
   @include image.editor;
   @include paragraph.editor;
   @include table.editor;

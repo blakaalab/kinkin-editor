@@ -1,3 +1,5 @@
+@use "../../styles/tokens" as t;
+
 // Columns are laid out entirely here — the node ships no node view, so these
 // rules are the whole layout, in the editor and on a rendered page alike.
 @mixin content {
@@ -42,6 +44,20 @@
 
     [data-type="column"] + [data-type="column"] {
       margin-top: 1.125em;
+    }
+  }
+}
+
+@mixin editor {
+  // An empty column is one line of blank space: while an author is filling a
+  // row in, there is nothing to show where the columns are. The guide is an
+  // outline rather than a border so it costs no layout, and it is scoped to an
+  // editable editor — a read-only view has no use for it.
+  &:not([contenteditable="false"]) {
+    [data-type="column"]:has(> p:only-child > .ProseMirror-trailingBreak:only-child) {
+      outline: 1px dashed t.token("column-guide");
+      outline-offset: 3px;
+      border-radius: 0.125rem;
     }
   }
 }
