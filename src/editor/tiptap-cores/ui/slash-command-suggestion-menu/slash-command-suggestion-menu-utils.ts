@@ -4,6 +4,9 @@ import type { Editor } from "@tiptap/react";
 import {
   CaseSensitive,
   CodeXml,
+  Columns2,
+  Columns3,
+  Columns4,
   Heading1,
   Heading2,
   Heading3,
@@ -235,6 +238,21 @@ const menuItemTexts = {
     aliases: ["image", "img", "photo", "picture", "upload"],
     badge: ImageIcon,
   },
+  columns_2: {
+    title: "2 columns",
+    aliases: ["columns", "column", "cols", "layout", "2col", "split"],
+    badge: Columns2,
+  },
+  columns_3: {
+    title: "3 columns",
+    aliases: ["columns", "column", "cols", "layout", "3col"],
+    badge: Columns3,
+  },
+  columns_4: {
+    title: "4 columns",
+    aliases: ["columns", "column", "cols", "layout", "4col"],
+    badge: Columns4,
+  },
   divider: {
     title: "Horizontal line",
     aliases: ["hr", "horizontal", "line", "separator", "—", "-"],
@@ -250,6 +268,7 @@ const menuItemSections: SlashMenuItemType[][] = [
   ["bullet_list", "ordered_list", "task_list"],
   ["code_block", "quote"],
   ["table", "image"],
+  ["columns_2", "columns_3", "columns_4"],
   ["emoji", "divider"],
 ];
 
@@ -344,6 +363,24 @@ const getMenuItemImplementations = () => ({
         .focus()
         .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
         .run();
+    },
+  },
+  columns_2: {
+    check: (editor: Editor) => isNodeInSchema("columns", editor),
+    action: ({ editor }: { editor: Editor }) => {
+      editor.chain().focus().insertColumns(2).run();
+    },
+  },
+  columns_3: {
+    check: (editor: Editor) => isNodeInSchema("columns", editor),
+    action: ({ editor }: { editor: Editor }) => {
+      editor.chain().focus().insertColumns(3).run();
+    },
+  },
+  columns_4: {
+    check: (editor: Editor) => isNodeInSchema("columns", editor),
+    action: ({ editor }: { editor: Editor }) => {
+      editor.chain().focus().insertColumns(4).run();
     },
   },
   divider: {

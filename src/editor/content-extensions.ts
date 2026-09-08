@@ -12,6 +12,10 @@ import { UniqueID } from "@tiptap/extension-unique-id";
 import type { StarterKitOptions } from "@tiptap/starter-kit";
 import { StarterKit } from "@tiptap/starter-kit";
 
+import {
+  Column,
+  Columns,
+} from "@/editor/tiptap-cores/nodes/column-node/column-node-schema";
 import { HorizontalRule } from "@/editor/tiptap-cores/nodes/horizontal-rule-node/horizontal-rule-node-extension";
 import { ImageUploadNode } from "@/editor/tiptap-cores/nodes/image-node/image-upload-node-schema";
 import { ContentTable } from "@/editor/tiptap-cores/nodes/table-node/table-node-schema";
@@ -111,6 +115,8 @@ export const createContentExtensions = (): Extensions => [
   }),
   BlockListItem,
   HorizontalRule,
+  Columns,
+  Column,
   ContentTable,
   TableRow,
   ParagraphTableHeader,

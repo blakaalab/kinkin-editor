@@ -1,0 +1,47 @@
+// Columns are laid out entirely here — the node ships no node view, so these
+// rules are the whole layout, in the editor and on a rendered page alike.
+@mixin content {
+  [data-type="columns"] {
+    display: flex;
+    align-items: flex-start;
+    gap: 1em;
+    margin: 1.125em 0;
+
+    &:first-child {
+      margin-top: 0;
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  [data-type="column"] {
+    // Equal shares of the row, whatever each one holds.
+    flex: 1 1 0;
+    // A flex child is `min-width: auto` by default, so one wide thing — a
+    // table, a long line of code — would push its column past its share and
+    // squeeze the others.
+    min-width: 0;
+
+    > *:first-child {
+      margin-top: 0;
+    }
+
+    > *:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  // Below this there is no width to divide: four columns of six characters
+  // each is worse than four blocks. The row becomes a stack.
+  @media (max-width: 640px) {
+    [data-type="columns"] {
+      display: block;
+    }
+
+    [data-type="column"] + [data-type="column"] {
+      margin-top: 1.125em;
+    }
+  }
+}

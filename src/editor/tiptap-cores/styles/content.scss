@@ -21,6 +21,7 @@
 
 @use "../nodes/blockquote-node/blockquote-node" as blockquote;
 @use "../nodes/code-block-node/code-block-node" as code-block;
+@use "../nodes/column-node/column-node" as column;
 @use "../nodes/horizontal-rule-node/horizontal-rule-node" as horizontal-rule;
 @use "../nodes/list-node/list-node" as list;
 @use "../nodes/heading-node/heading-node" as heading;
@@ -32,6 +33,7 @@
   .kinkin-content {
     @include blockquote.content;
     @include code-block.content;
+    @include column.content;
     @include horizontal-rule.content;
     @include list.content;
     @include heading.content;

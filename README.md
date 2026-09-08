@@ -59,7 +59,7 @@ upload and AI are plain callbacks you supply, or leave out.
 ## Features
 
 **Slash menu** (type `/`): Paragraph, Heading 1–4, Bullet list, Numbered list,
-Task list, Quote, Code, Emoji, Table, Image, Horizontal line.
+Task list, Quote, Code, Emoji, Table, Image, Columns (2–4), Horizontal line.
 
 **Also built in**
 
@@ -67,6 +67,7 @@ Task list, Quote, Code, Emoji, Table, Image, Horizontal line.
 - Emoji picker on `:`
 - Drag handle on each block to reorder; `Mod-Shift-↑/↓` to move, `Mod-Shift-D` to duplicate
 - Tables with column/row controls and drag-to-reorder
+- Columns — 2 to 4 side by side, holding any block, stacking on narrow screens
 - Link editing, code blocks, task lists, highlights, typography substitutions
 - Image upload through a callback you supply
 - Streaming AI Assist — improve, continue, summarize, fix grammar, simplify,
