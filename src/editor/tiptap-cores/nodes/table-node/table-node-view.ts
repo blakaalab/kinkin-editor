@@ -21,8 +21,6 @@ import {
 } from "./table-helpers";
 import { createIcon, ICONS } from "./table-icons";
 
-export { convertCellType } from "./table-helpers";
-
 export const createTableNodeView = ({
   node,
   editor,

@@ -1,11 +1,7 @@
-export { FixedToolbar } from "@/editor/fixed-toolbar";
-export { MobileToolbar } from "@/editor/mobile-toolbar";
-export type { RichTextEditorProps } from "@/editor/rich-text-editor";
+// The site's import surface. The published API is `src/index.ts`; this exists
+// so pages can write `@/editor` for the handful of things they use.
+
 export { RichTextEditor } from "@/editor/rich-text-editor";
-export { SelectionToolbar } from "@/editor/selection-toolbar";
 export type { EditorImageUploadHandler } from "@/editor/tiptap-cores/hooks/use-editor-image-upload";
 export { ToC } from "@/editor/toc";
-export type {
-  StreamCompletionFn,
-  StreamCompletionParams,
-} from "@/editor/use-ai-assist-stream";
+export type { StreamCompletionParams } from "@/editor/use-ai-assist-stream";

@@ -80,8 +80,6 @@ function useEventListener<
   }, [eventName, element, options]);
 }
 
-export { useEventListener };
-
 type EventType =
   | "mousedown"
   | "mouseup"

@@ -576,6 +576,7 @@ npm run build:playground  # the site → dist-playground/
 npm run type-check
 npm run check             # Biome lint + format
 npm run check:fix
+npm run knip              # unused files, exports and dependencies
 ```
 
 `src/site/` is the public site — a landing page (`/`), a playground
@@ -668,6 +669,11 @@ emoji picker, tables, drag handles, AI Assist UI, and markdown serialization.
   declaration computes to the guaranteed-invalid value and the animation never
   runs, silently. They carry `animate-[...]` arbitrary values instead, which put
   the shorthand on the element where those variables are in scope.
+- `knip.config.ts` names the two entry points knip cannot infer — `src/content.ts`,
+  reached only through package.json's `exports` map, and `content.scss`, which
+  its build script names as a path rather than importing — and teaches it to
+  resolve Sass partials (`@use "tokens"` → `_tokens.scss`). Without that last
+  part knip skips stylesheets entirely and an orphaned partial goes unnoticed.
 - The playground builds to `dist-playground/` specifically so it can't overwrite
   the `dist/` that gets published.
 - `.github/workflows/deploy-pages.yml` publishes `dist-playground/` to GitHub
