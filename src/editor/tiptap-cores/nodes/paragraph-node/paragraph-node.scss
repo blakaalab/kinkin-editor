@@ -114,6 +114,18 @@
     caret-color: transparent;
   }
 
+  // Selecting a block with the drag handle makes a NodeSelection, and
+  // ProseMirror hides the native selection for one by adding
+  // `.ProseMirror-hideselection`. Its own stylesheet zeroes the selection
+  // background there but says nothing about the colour, and the rule above that
+  // owns the colour is switched off by the same class — so a host app's
+  // `::selection { color }` paints the text of a node-selected block while a
+  // mouse selection of the same block keeps its colour. Hold the colour here
+  // too, and the two selections match.
+  &.ProseMirror-hideselection ::selection {
+    color: t.token("selection-text");
+  }
+
   // Resize cursor
   &.resize-cursor {
     cursor: ew-resize;
