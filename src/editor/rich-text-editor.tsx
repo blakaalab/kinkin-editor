@@ -7,21 +7,13 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 
-import { Emoji, gitHubEmojis } from "@tiptap/extension-emoji";
-import { Highlight } from "@tiptap/extension-highlight";
+import type { AnyExtension } from "@tiptap/core";
 import { History } from "@tiptap/extension-history";
-import Image from "@tiptap/extension-image";
-import { ListItem, TaskItem, TaskList } from "@tiptap/extension-list";
-import { Mention } from "@tiptap/extension-mention";
-import { Strike } from "@tiptap/extension-strike";
-import { TableCell, TableHeader, TableRow } from "@tiptap/extension-table";
 import {
   type TableOfContentDataItem,
   TableOfContents,
 } from "@tiptap/extension-table-of-contents";
-import { Color, TextStyle } from "@tiptap/extension-text-style";
 import { Typography } from "@tiptap/extension-typography";
-import { UniqueID } from "@tiptap/extension-unique-id";
 import { Placeholder, Selection } from "@tiptap/extensions";
 import { Markdown } from "@tiptap/markdown";
 import {
@@ -33,6 +25,10 @@ import {
 } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";
 
+import {
+  CONTENT_STARTER_KIT_OPTIONS,
+  createContentExtensions,
+} from "@/editor/content-extensions";
 import { MobileToolbar } from "@/editor/mobile-toolbar";
 import { EDITOR_SCOPE_CLASS, getEditorPortalRoot } from "@/editor/portal-root";
 import { SelectionToolbar } from "@/editor/selection-toolbar";
@@ -55,7 +51,6 @@ import {
   clearEditorHistory,
   sanitizeNode,
 } from "@/editor/tiptap-cores/lib/tiptap-utils";
-import { HorizontalRule } from "@/editor/tiptap-cores/nodes/horizontal-rule-node/horizontal-rule-node-extension";
 import { ImageUpload } from "@/editor/tiptap-cores/nodes/image-node/image-upload-node-extension";
 import { CustomTable } from "@/editor/tiptap-cores/nodes/table-node/table-node-extension";
 import { AiAssistPanel } from "@/editor/tiptap-cores/ui/ai-assist";
@@ -72,94 +67,64 @@ import "@/editor/tiptap-cores/styles/index.scss";
 
 import { useCursorVisibility } from "@/editor/tiptap-cores/hooks/use-cursor-visibility";
 
-const createExtensions = () => [
-  StarterKit.configure({
-    undoRedo: false,
-    horizontalRule: false,
-    strike: false,
-    listItem: false,
-    dropcursor: { width: 2, color: false },
-    link: { openOnClick: false },
-  }),
-  ListItem.extend({ content: "block+" }),
+/**
+ * The editing half of each shared schema extension: a node view, commands, a
+ * keymap. Swapped in by name so the two lists stay one list — see
+ * `createExtensions` below.
+ */
+const withEditorBehaviour = (
+  extension: AnyExtension,
+  onTocItemsChange?: (items: TableOfContentDataItem[]) => void,
+): AnyExtension => {
+  switch (extension.name) {
+    case "starterKit":
+      return StarterKit.configure({
+        ...CONTENT_STARTER_KIT_OPTIONS,
+        // History replaces StarterKit's undo/redo.
+        undoRedo: false,
+        dropcursor: { width: 2, color: false },
+        link: { openOnClick: false },
+      });
+    case "table":
+      return CustomTable;
+    case "imageUpload":
+      return ImageUpload;
+    case "tableOfContents":
+      return TableOfContents.configure({
+        onUpdate: (items) => onTocItemsChange?.(items),
+      });
+    default:
+      return extension;
+  }
+};
+
+/**
+ * Every extension the editor runs: the shared content schema, with editing
+ * behaviour attached, followed by the extensions that only make sense while
+ * editing — none of which add a node, a mark or an attribute.
+ *
+ * The schema deliberately comes from `createContentExtensions()` rather than
+ * being restated here. Static rendering uses that same list, so a node added
+ * for the editor is a node a rendered document can already display.
+ */
+const createExtensions = (
+  onTocItemsChange?: (items: TableOfContentDataItem[]) => void,
+) => [
+  ...createContentExtensions().map((extension) =>
+    withEditorBehaviour(extension, onTocItemsChange),
+  ),
+
   DropGuard,
-  HorizontalRule,
-  CustomTable,
-  TableRow,
-  TableHeader.extend({ content: "paragraph+" }),
-  TableCell.extend({ content: "paragraph+" }),
   Placeholder.configure({
     placeholder: "Write, type '/' for commands…",
     emptyNodeClass: "is-empty",
   }),
-  Mention,
-  Emoji.configure({
-    emojis: gitHubEmojis.filter((emoji) => !emoji.name.includes("regional")),
-    forceFallbackImages: true,
-  }),
-  Color,
-  TextStyle,
-  TaskList,
-  TaskItem.configure({ nested: true }),
-  Strike.extend({
-    addAttributes() {
-      return {
-        ...this.parent?.(),
-        aiAssist: {
-          default: null,
-          parseHTML: (element: HTMLElement) =>
-            element.getAttribute("data-ai-assist") || null,
-          renderHTML: (attributes: { aiAssist?: string | null }) => {
-            if (!attributes.aiAssist) {
-              return {};
-            }
-            return {
-              "data-ai-assist": attributes.aiAssist,
-            };
-          },
-        },
-      };
-    },
-  }),
-  Highlight.extend({
-    addAttributes() {
-      return {
-        ...this.parent?.(),
-        aiAssist: {
-          default: null,
-          parseHTML: (element) =>
-            element.getAttribute("data-ai-assist") || null,
-          renderHTML: (attributes) => {
-            if (!attributes.aiAssist) {
-              return {};
-            }
-            return {
-              "data-ai-assist": attributes.aiAssist,
-            };
-          },
-        },
-      };
-    },
-  }).configure({ multicolor: true }),
   Selection,
-  UniqueID.configure({
-    types: [
-      "paragraph",
-      "bulletList",
-      "orderedList",
-      "taskList",
-      "heading",
-      "blockquote",
-      "codeBlock",
-    ],
-  }),
   Typography,
   AiAssist,
   StreamContent,
   UiState,
   KeyboardShortcuts,
-  Image,
-  ImageUpload,
   History.configure({ depth: 100 }),
   Markdown.configure({
     markedOptions: { gfm: true },
@@ -313,12 +278,7 @@ export const RichTextEditor = ({
           onChange(editor.getText(), { source });
       }
     },
-    extensions: [
-      ...createExtensions(),
-      TableOfContents.configure({
-        onUpdate: (items) => onTocItemsChange?.(items),
-      }),
-    ],
+    extensions: createExtensions(onTocItemsChange),
   });
 
   const { handleAiAssist, abortStream } = useAiAssistStream(editor, {

@@ -1,8 +1,10 @@
-.tiptap-core.ProseMirror {
+@use "../../styles/tokens" as t;
+
+@mixin content {
   hr {
     border: none;
     height: 1px;
-    background-color: var(--tt-core-horizontal-line);
+    background-color: t.token("horizontal-line");
     margin: 0;
   }
 

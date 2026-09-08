@@ -72,6 +72,8 @@ Task list, Quote, Code, Emoji, Table, Image, Horizontal line.
 - Streaming AI Assist — improve, continue, summarize, fix grammar, simplify,
   shorten, extend, translate, change tone, or a custom prompt
 - Table of contents via `onTocItemsChange`
+- Render saved documents without the editor — a schema-only extension list
+  and a display-only stylesheet, both published separately
 - Fixed, floating-selection and mobile toolbars
 - TypeScript types included; React 18 and 19
 
@@ -201,6 +203,116 @@ separate `--tt-core-*` namespace, overridable the same way:
 
 ---
 
+## Rendering saved content without the editor
+
+A saved document is Tiptap JSON, and rendering it on a public page needs two
+things the editor bundle is the wrong place to get: the schema, and the content
+CSS. Both ship separately.
+
+```tsx
+// A server component. No React editor, no editor stylesheet, no browser APIs.
+import { generateHTML } from "@tiptap/core";
+import { CONTENT_SCOPE_CLASS, createContentExtensions } from "@blakaa/kinkin-editor/content";
+import "@blakaa/kinkin-editor/content.css";
+
+export function Post({ doc }: { doc: JSONContent }) {
+  const html = generateHTML(doc, createContentExtensions());
+
+  return (
+    <article
+      className={CONTENT_SCOPE_CLASS}
+      dangerouslySetInnerHTML={{ __html: html }}
+    />
+  );
+}
+```
+
+### `createContentExtensions()`
+
+Every extension that shapes the document — nodes, marks, and the attributes on
+them — and nothing that only exists to make editing work. `<RichTextEditor />`
+builds its own list on top of this one, attaching node views and commands by
+name, so the two cannot drift: a node added for the editor is a node this list
+already renders.
+
+It is the list to pass to `generateHTML`, `generateJSON` or `getSchema`.
+Hand-mirroring the editor's extensions is the thing to avoid — a document
+containing a node your list doesn't know throws
+`RangeError: Unknown node type`, and it throws for readers, in production, on
+whichever post happened to use the new node.
+
+Three entries look surprising and are all load-bearing:
+
+| Entry | Why it's here |
+| --- | --- |
+| `ContentTable` | Emits `.table-node-wrapper > .table-scroll-container` around the table, matching what the node view builds while editing. Without it a wide table overflows the page and none of the table CSS applies. |
+| `ImageUploadNode` | The placeholder for an upload that never finished. Rare in saved content, and hidden on the page by `content.css`, but a document containing one still has to parse. |
+| `TableOfContents` | Owns the `id` and `data-toc-id` attributes on headings. Leave it out and every heading loses its anchor, breaking in-page links and any table of contents you render alongside. |
+
+`generateHTML` serializes through the DOM, so on a server it needs one —
+install `jsdom` or `happy-dom` and set `globalThis.document` before calling it.
+That is a Tiptap requirement, not a kinkin one. (With jsdom you'll see one
+`HTMLCanvasElement's getContext() method` warning: it comes from the emoji
+extension's support probe, which correctly falls back to image emoji.)
+
+### `content.css`
+
+The display half. Content rules only — no toolbars, menus, selection or drag
+affordances, no Tailwind utilities, no `@theme` block and no reset — and every
+rule comes from the same source as the editor's, so a rendered page and the
+editor cannot look different.
+
+Three properties worth knowing:
+
+**It is scoped to one opt-in class.** Nothing is styled until you put
+`kinkin-content` (exported as `CONTENT_SCOPE_CLASS`) on the element. Font size,
+family and text colour are inherited, never set — every measurement is in `em`,
+so the content scales with whatever your page gives it.
+
+**It sits in a cascade layer.** Everything is inside `@layer kinkin-content`.
+Unlayered CSS beats a layer regardless of specificity, so your own rules win
+without `!important` or specificity games:
+
+```css
+/* No layer, so this wins over content.css — the selector doesn't have to be
+   more specific than the one it's overriding. */
+.kinkin-content h1 { font-size: 2.5rem; }
+```
+
+**Every colour is a `--tt-core-*` variable, and the sheet declares none of
+them.** Each is a `var()` with its default as the fallback, so setting a token
+anywhere above the content element themes it — including a dark mode:
+
+```css
+html.dark {
+  --tt-core-code-bg: #232733;
+  --tt-core-code-text: #e6e8ec;
+  --tt-core-codeblock-bg: #1b1f27;
+  --tt-core-blockquote: #5b6472;
+  --tt-core-link: #7ebcfd;
+  --tt-core-horizontal-line: #2b303a;
+  --tt-core-table-border: #2b303a;
+  --tt-core-table-header-bg: #1b1f27;
+  --tt-core-table-stripe-bg: #191c23;
+  --tt-core-tasklist-bg: #232733;
+  --tt-core-tasklist-border: #5b6472;
+}
+```
+
+(This is why the sheet declares no defaults on `.kinkin-content` itself: an
+inherited custom property is resolved by proximity, not specificity, so a
+declaration on the content element would silently beat one on `html.dark`.)
+
+Two display-only decisions: task-list checkboxes are rendered but not
+clickable — a page has nowhere to save the click — and the `imageUpload`
+placeholder is hidden.
+
+One constraint: the scope element is `white-space: pre-wrap`, matching the
+editor, so runs of spaces the author typed survive. Don't pretty-print or
+indent the generated HTML inside it — that indentation would render.
+
+---
+
 ## API reference
 
 ### `<RichTextEditor />`
@@ -323,6 +435,8 @@ Omit it and the AI buttons become no-ops, with a console warning.
 | `useAiAssistStream(editor, options)` | The hook behind AI Assist, if you're composing your own editor. |
 | `getEditorPortalRoot()` | The scoped container portalled UI renders into. |
 | `EDITOR_SCOPE_CLASS` | `"kinkin-editor"` — the scope class, for tagging your own portals. |
+| `createContentExtensions()` | The schema-only extension list, for rendering saved documents. Also at `@blakaa/kinkin-editor/content`. |
+| `CONTENT_SCOPE_CLASS` | `"kinkin-content"` — the class `content.css` scopes to. |
 | `<ToCItem />`, `<ToCEmptyState />` | The pieces `<ToC />` is built from, if you want your own outline layout. |
 | Types | `RichTextEditorProps`, `EditorImageUploadHandler`, `StreamCompletionFn`, `StreamCompletionParams` |
 
@@ -402,6 +516,22 @@ Something is rendering them outside the scoped container. Portal them into
 They shouldn't — that's what the scoping prevents. If it happens, it's a bug
 worth reporting.
 
+### `RangeError: Unknown node type` when rendering saved JSON
+
+The extension list you passed to `generateHTML` doesn't cover the document.
+Pass `createContentExtensions()` from `@blakaa/kinkin-editor/content` rather
+than a hand-written list — it is the same schema the editor runs, so it stays
+correct as the editor gains nodes. See
+[Rendering saved content without the editor](#rendering-saved-content-without-the-editor).
+
+### Rendered content is unstyled, or tables overflow the page
+
+Import `@blakaa/kinkin-editor/content.css` and put `kinkin-content` on the
+element the HTML goes into — nothing in that sheet applies without the class.
+If tables specifically overflow, the HTML was generated with a plain `Table`
+extension instead of the one in `createContentExtensions()`, which emits the
+scroll container the CSS needs.
+
 ---
 
 ## Licence
@@ -437,16 +567,19 @@ token stream) live in `src/site/demo.ts` — reference only, not for shipping.
 ```
 src/
 ├── index.ts                     # library entry (public API)
+├── content.ts                   # entry for rendering saved documents
 ├── lib.css                      # published stylesheet (no preflight, scoped)
 ├── editor/
 │   ├── rich-text-editor.tsx     # the main component
+│   ├── content-extensions.ts    # the shared schema — both lists come from it
+│   ├── content-scope.ts         # the content.css scope class
 │   ├── fixed-toolbar.tsx        # persistent toolbar
 │   ├── selection-toolbar.tsx    # floating toolbar (desktop)
 │   ├── mobile-toolbar.tsx       # bottom toolbar (mobile)
 │   ├── toc.tsx                  # table of contents
 │   ├── portal-root.ts           # scoped container for portalled UI
 │   ├── use-ai-assist-stream.ts  # AI prompt building + streaming glue
-│   └── tiptap-cores/            # the editor engine (89 files)
+│   └── tiptap-cores/            # the editor engine (93 files)
 ├── components/ui/               # shadcn primitives the engine uses
 ├── lib/utils.ts                 # cn()
 ├── styles/global.css            # site-only styles (has preflight)
@@ -460,6 +593,8 @@ src/
 │   ├── magicui/                 # vendored MagicUI components (site-only)
 │   └── pages/                   # home.tsx, playground.tsx, docs.tsx
 └── app.tsx                      # route switch
+
+scripts/build-content-css.mjs    # compiles dist/content.css (see Build notes)
 ```
 
 `tiptap-cores` is the bulk of it: extensions, node views, slash commands, the
@@ -483,6 +618,20 @@ emoji picker, tables, drag handles, AI Assist UI, and markdown serialization.
 
 - The library build (`--mode lib`) externalises React and all `@tiptap/*`, then
   scopes the CSS with `postcss-prefix-selector`. Both live in `vite.config.ts`.
+  It has two entries: `index.ts`, and `content.ts` for rendering saved documents
+  without the editor. What they share lands in a chunk both import.
+- `dist/content.css` is built by `scripts/build-content-css.mjs` rather than by
+  Vite, because the library build runs every stylesheet through
+  `postcss-prefix-selector` — which would nest the display rules under
+  `.kinkin-editor`, the one thing that sheet must not be. It has no Tailwind in
+  it, so Sass is the whole toolchain. It runs after `vite build`, which empties
+  `dist/`.
+- The content rules live in `@mixin content` blocks in the node stylesheets, so
+  `styles/index.scss` (the editor) and `styles/content.scss` (the page) include
+  the same rules rather than keeping two copies. `styles/_tokens.scss` holds
+  every `--tt-core-*` default: the editor sheet declares them on the scope
+  element, the display sheet inlines them as `var()` fallbacks so any ancestor
+  can theme it.
 - `lib.css` ends its `@source "./"` with `@source not "./site"`. Without it
   Tailwind scans the site too and every site-only utility lands in the published
   stylesheet — that alone was 31 kB of the 82 kB it used to be.

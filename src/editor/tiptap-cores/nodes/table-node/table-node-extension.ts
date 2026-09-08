@@ -1,14 +1,13 @@
-import { Table } from "@tiptap/extension-table";
 import type { Node as PmNode } from "@tiptap/pm/model";
 import { NodeSelection } from "@tiptap/pm/state";
 import { CellSelection, TableMap } from "@tiptap/pm/tables";
 
 import { convertCellType, focusCellInColumn } from "./table-helpers";
+import { CELL_MIN_WIDTH, ContentTable } from "./table-node-schema";
 import { createTableNodeView } from "./table-node-view";
 
-const CELL_MIN_WIDTH = 80;
-
-export const CustomTable = Table.extend({
+/** The shared table schema, with the editing half — node view and keymap. */
+export const CustomTable = ContentTable.extend({
   addNodeView() {
     return ({ node, editor, getPos }) => {
       return createTableNodeView({

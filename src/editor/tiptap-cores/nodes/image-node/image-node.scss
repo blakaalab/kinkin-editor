@@ -1,11 +1,17 @@
-.tiptap-core.ProseMirror {
+@use "../../styles/tokens" as t;
+
+@mixin content {
   img {
     width: 100%;
     height: auto;
     border-radius: 0.375rem;
+  }
+}
 
+@mixin editor {
+  img {
     &.ProseMirror-selectednode {
-      outline: 2px solid var(--tt-core-dropcursor);
+      outline: 2px solid t.token("dropcursor");
       outline-offset: 2px;
     }
 
@@ -19,7 +25,7 @@
   }
 
   .node-imageUpload.ProseMirror-selectednode {
-    outline: 2px solid var(--tt-core-dropcursor);
+    outline: 2px solid t.token("dropcursor");
     outline-offset: 2px;
     border-radius: 0.375rem;
   }

@@ -1,4 +1,12 @@
-.tiptap-core.ProseMirror {
+@use "../../styles/tokens" as t;
+
+//
+// Rules are mixins, not selectors: the editor sheet includes them under
+// `.tiptap-core.ProseMirror`, the display sheet under `.kinkin-content`.
+// `content` is what a saved document needs to look right; `editor` is
+// editing affordances that a rendered page has no use for.
+//
+@mixin content {
   blockquote {
     position: relative;
     padding-left: 1em;
@@ -21,7 +29,7 @@
       height: 100%;
       width: 0.25em;
       border-radius: 0.1em;
-      background-color: var(--tt-core-blockquote);
+      background-color: t.token("blockquote");
       content: "";
     }
   }

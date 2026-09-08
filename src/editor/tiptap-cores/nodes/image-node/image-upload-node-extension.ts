@@ -1,17 +1,11 @@
-import { mergeAttributes, Node } from "@tiptap/core";
 import type { Transaction } from "@tiptap/pm/state";
 import { Plugin, PluginKey, TextSelection } from "@tiptap/pm/state";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 
+import { ImageUploadNode } from "./image-upload-node-schema";
 import { ImageUploadNodeView } from "./image-upload-node-view";
 
-export interface ImageUploadNodeAttributes {
-  src: string | null;
-  alt: string | null;
-  uploadId: string | null;
-  uploadProgress: number;
-  uploadError: string | null;
-}
+export type { ImageUploadNodeAttributes } from "./image-upload-node-schema";
 
 export interface ImageUploadStorage {
   uploadImage: ((file: File) => void) | null;
@@ -54,39 +48,13 @@ const setCursorAfterNode = (tr: Transaction, posAfterNode: number) => {
   }
 };
 
-export const ImageUpload = Node.create({
-  name: "imageUpload",
-  group: "block",
-  atom: true,
-  draggable: true,
-  selectable: true,
-
+/** The shared placeholder schema, with the upload UI and drop handling. */
+export const ImageUpload = ImageUploadNode.extend({
   addStorage(): ImageUploadStorage {
     return {
       uploadImage: null,
       startUploadForNode: null,
     };
-  },
-
-  addAttributes() {
-    return {
-      src: { default: null },
-      alt: { default: null },
-      uploadId: { default: null },
-      uploadProgress: { default: 0 },
-      uploadError: { default: null },
-    };
-  },
-
-  parseHTML() {
-    return [{ tag: 'div[data-type="imageUpload"]' }];
-  },
-
-  renderHTML({ HTMLAttributes }) {
-    return [
-      "div",
-      mergeAttributes(HTMLAttributes, { "data-type": "imageUpload" }),
-    ];
   },
 
   addNodeView() {

@@ -70,9 +70,15 @@ export default defineConfig(({ mode, command }) => {
           // the library output that `files: ["dist"]` publishes.
           build: {
             lib: {
-              entry: path.resolve(__dirname, "src/index.ts"),
+              entry: {
+                index: path.resolve(__dirname, "src/index.ts"),
+                // Rendering a saved document, without the editor: schema only,
+                // no React, no browser APIs. Its stylesheet is built
+                // separately — see scripts/build-content-css.mjs.
+                content: path.resolve(__dirname, "src/content.ts"),
+              },
               formats: ["es"] as const,
-              fileName: () => "index.js",
+              fileName: (_format, name) => `${name}.js`,
               cssFileName: "style",
             },
             sourcemap: true,

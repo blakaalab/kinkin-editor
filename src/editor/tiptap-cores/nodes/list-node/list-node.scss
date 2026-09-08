@@ -1,4 +1,6 @@
-.tiptap-core.ProseMirror {
+@use "../../styles/tokens" as t;
+
+@mixin content {
   // Common list styles
   ol,
   ul {
@@ -90,11 +92,11 @@
           margin: 0;
           width: 1em;
           height: 1em;
-          border: 1px solid var(--tt-core-tasklist-border);
+          border: 1px solid t.token("tasklist-border");
           border-radius: 0.2em;
           position: relative;
           cursor: pointer;
-          background-color: var(--tt-core-tasklist-bg);
+          background-color: t.token("tasklist-bg");
           transition:
             background-color 80ms ease-out,
             border-color 80ms ease-out;
@@ -116,8 +118,8 @@
           }
 
           &:checked {
-            background: var(--tt-core-tasklist-bg-active);
-            border-color: var(--tt-core-tasklist-bg-active);
+            background: t.token("tasklist-bg-active");
+            border-color: t.token("tasklist-bg-active");
 
             &::before {
               opacity: 1;
@@ -125,7 +127,7 @@
           }
 
           &:focus-visible {
-            outline: 2px solid var(--tt-core-tasklist-bg-active);
+            outline: 2px solid t.token("tasklist-bg-active");
             outline-offset: 2px;
           }
         }

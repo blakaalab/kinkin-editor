@@ -1,14 +1,39 @@
+//
+// The editor stylesheet: content rules plus every editing affordance.
+//
+// The content half is shared with `content.scss`, the display-only sheet
+// published as `@blakaa/kinkin-editor/content.css` — both include the same
+// `content` mixins, so a rendered document and the editor cannot drift apart.
+//
 @use "variables.scss";
+@use "tokens" as t;
 
-/* Node styles */
-@use "../nodes/blockquote-node/blockquote-node";
-@use "../nodes/code-block-node/code-block-node";
-@use "../nodes/horizontal-rule-node/horizontal-rule-node";
-@use "../nodes/list-node/list-node";
-@use "../nodes/heading-node/heading-node";
-@use "../nodes/image-node/image-node";
-@use "../nodes/paragraph-node/paragraph-node";
-@use "../nodes/table-node/table-node";
+@use "../nodes/blockquote-node/blockquote-node" as blockquote;
+@use "../nodes/code-block-node/code-block-node" as code-block;
+@use "../nodes/horizontal-rule-node/horizontal-rule-node" as horizontal-rule;
+@use "../nodes/list-node/list-node" as list;
+@use "../nodes/heading-node/heading-node" as heading;
+@use "../nodes/image-node/image-node" as image;
+@use "../nodes/paragraph-node/paragraph-node" as paragraph;
+@use "../nodes/table-node/table-node" as table;
+
+.tiptap-core.ProseMirror {
+  @include blockquote.content;
+  @include code-block.content;
+  @include horizontal-rule.content;
+  @include list.content;
+  @include heading.content;
+  @include image.content;
+  @include paragraph.content;
+  @include table.content;
+
+  @include image.editor;
+  @include paragraph.editor;
+  @include table.editor;
+}
+
+@include paragraph.editor-global;
+@include table.editor-global;
 
 .tiptap-core.ProseMirror * {
   outline: none;
@@ -42,12 +67,12 @@ span.tiptap-core-slash-decoration.is-empty::after {
 // AI Assist styling during streaming
 .tiptap-core s[data-ai-assist],
 .tiptap-core s[data-ai-assist] * {
-  color: var(--tt-core-ai-assist-strikethrough);
+  color: t.token("ai-assist-strikethrough");
 }
 
 .tiptap-core mark[data-ai-assist] {
-  color: var(--tt-core-ai-assist-highlight-text);
-  background-color: var(--tt-core-ai-assist-highlight);
+  color: t.token("ai-assist-highlight-text");
+  background-color: t.token("ai-assist-highlight");
 }
 
 // Streaming cursor — blinking caret at end of content during streaming
@@ -56,7 +81,7 @@ span.tiptap-core-slash-decoration.is-empty::after {
   display: inline-block;
   width: 3px;
   height: 1.1em;
-  background-color: var(--tt-core-dropcursor);
+  background-color: t.token("dropcursor");
   margin-left: 2px;
   vertical-align: text-bottom;
   border-radius: 1px;

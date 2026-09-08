@@ -1,9 +1,11 @@
-.tiptap-core.ProseMirror {
+@use "../../styles/tokens" as t;
+
+@mixin content {
   // Inline code
   code {
-    background-color: var(--tt-core-code-bg);
-    color: var(--tt-core-code-text);
-    font-family: "JetBrainsMono", monospace;
+    background-color: t.token("code-bg");
+    color: t.token("code-text");
+    font-family: t.token("font-mono");
     font-size: 0.875em;
     border-radius: 0.25em;
     padding: 0.13em 0.25em;
@@ -11,9 +13,9 @@
 
   // Code blocks
   pre {
-    font-family: "JetBrainsMono", monospace;
-    background-color: var(--tt-core-codeblock-bg);
-    color: var(--tt-core-code-text);
+    font-family: t.token("font-mono");
+    background-color: t.token("codeblock-bg");
+    color: t.token("code-text");
     margin-top: 1.125em;
     margin-bottom: 1.125em;
     padding: 1em;

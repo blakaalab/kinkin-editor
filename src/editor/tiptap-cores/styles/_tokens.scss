@@ -1,0 +1,62 @@
+@use "sass:map";
+
+// Every `--tt-core-*` custom property, with its default value.
+//
+// Both stylesheets read from this one map, in different ways:
+//
+//   - the editor sheet declares the whole set on the scope element
+//     (`_variables.scss`), which is where `.kinkin-editor` gets its look;
+//   - the display sheet (`content.scss`) declares nothing and inlines each
+//     default as a `var()` fallback instead. A declaration block on the content
+//     element would beat anything an ancestor sets -- inheritance is decided by
+//     proximity, not specificity -- so `html.dark { --tt-core-code-bg: ... }`
+//     would silently lose. With fallbacks only, any ancestor wins.
+
+$defaults: (
+  "blockquote": #62748e,
+  "code-text": #2e3c47,
+  "code-bg": #eff0f7,
+  "codeblock-bg": #f5f6fb,
+  "selection": #e6f1fd,
+  "link": #1c85f5,
+  "placeholder": #a6aeba,
+  "dropcursor": #1c85f5,
+  "horizontal-line": #e5e9ef,
+  "tasklist-bg": #fafbfb,
+  "tasklist-bg-active": #3788ee,
+  "tasklist-border": #a6aeba,
+  "ai-assist-strikethrough": #778397,
+  "ai-assist-highlight": #e6f5ef,
+  "ai-assist-highlight-text": #0d8050,
+  "table-border": #e5e9ef,
+  "table-header-bg": #f5f6fb,
+  "table-stripe-bg": #fafbfb,
+  "table-control-bg": transparent,
+  "table-control-hover-bg": #dfe2e8,
+  "table-control-color": #a6aeba,
+  "table-control-hover-color": #4a5568,
+  "dropdown-bg": #ffffff,
+  "dropdown-border": #e5e7eb,
+  "dropdown-text": #374151,
+  "dropdown-hover-bg": #f3f4f6,
+  "dropdown-destructive": #dc2626,
+  "dropdown-destructive-bg": #fef2f2,
+  "bg": #ffffff,
+  "font-mono": ("JetBrainsMono", monospace),
+);
+
+/// A `--tt-core-*` reference carrying its default as the `var()` fallback.
+@function token($name) {
+  @if not map.has-key($defaults, $name) {
+    @error "Unknown --tt-core token: #{$name}.";
+  }
+
+  @return var(--tt-core-#{$name}, #{map.get($defaults, $name)});
+}
+
+/// Declares the full set as custom properties. Editor sheet only.
+@mixin declare-defaults {
+  @each $name, $value in $defaults {
+    --tt-core-#{$name}: #{$value};
+  }
+}

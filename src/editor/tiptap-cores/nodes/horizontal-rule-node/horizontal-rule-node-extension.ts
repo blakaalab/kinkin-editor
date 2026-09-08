@@ -1,8 +1,12 @@
-import { canInsertNode, isNodeSelection } from "@tiptap/core";
+import { canInsertNode, isNodeSelection, mergeAttributes } from "@tiptap/core";
 import TiptapHorizontalRule from "@tiptap/extension-horizontal-rule";
 import { NodeSelection, TextSelection } from "@tiptap/pm/state";
-import { mergeAttributes } from "@tiptap/react";
 
+/**
+ * A horizontal rule wrapped in a `div` so it can carry block padding without
+ * the `hr` itself growing. The wrapper is schema, not decoration — a rendered
+ * document needs it too, so this extension is part of the content list.
+ */
 export const HorizontalRule = TiptapHorizontalRule.extend({
   renderHTML() {
     return [

@@ -1,5 +1,7 @@
 import "./lib.css";
 
+export { createContentExtensions } from "./editor/content-extensions";
+export { CONTENT_SCOPE_CLASS } from "./editor/content-scope";
 export { FixedToolbar } from "./editor/fixed-toolbar";
 export { MobileToolbar } from "./editor/mobile-toolbar";
 export {

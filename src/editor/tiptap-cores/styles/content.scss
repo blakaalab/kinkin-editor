@@ -1,0 +1,69 @@
+// `@blakaa/kinkin-editor/content.css` — the display-only stylesheet.
+//
+// What a saved document needs to render correctly, and nothing else: no
+// toolbars, menus, selection or drag affordances, no Tailwind utilities, no
+// `@theme` block, no reset, and no declarations outside the scope class.
+//
+// Three deliberate properties:
+//
+//   1. Everything sits in the `kinkin-content` cascade layer. Unlayered host
+//      CSS beats a layer no matter the specificity, so `.prose h1 { ... }` in
+//      your app wins over these rules without `!important` or selector games.
+//   2. One opt-in scope class, `.kinkin-content`. Nothing is styled unless you
+//      put that class on the element you render the document into.
+//   3. Every colour is a `--tt-core-*` custom property with its default as the
+//      `var()` fallback, and the sheet declares none of them. Set them wherever
+//      you like -- `:root`, `html.dark`, the content element itself -- and they
+//      cascade in.
+//
+// The content rules themselves are the same mixins the editor stylesheet
+// includes, so what you see while editing is what the page renders.
+
+@use "../nodes/blockquote-node/blockquote-node" as blockquote;
+@use "../nodes/code-block-node/code-block-node" as code-block;
+@use "../nodes/horizontal-rule-node/horizontal-rule-node" as horizontal-rule;
+@use "../nodes/list-node/list-node" as list;
+@use "../nodes/heading-node/heading-node" as heading;
+@use "../nodes/image-node/image-node" as image;
+@use "../nodes/paragraph-node/paragraph-node" as paragraph;
+@use "../nodes/table-node/table-node" as table;
+
+@layer kinkin-content {
+  .kinkin-content {
+    @include blockquote.content;
+    @include code-block.content;
+    @include horizontal-rule.content;
+    @include list.content;
+    @include heading.content;
+    @include image.content;
+    @include paragraph.content;
+    @include table.content;
+
+    // Font size, family and colour are inherited, never set here — the page
+    // decides those. Every measurement above is in `em`, so it scales with
+    // whatever `font-size` the host gives the content element.
+
+    // `h5` mirrors what the editor shows for it (the editor's own rule lives in
+    // the Tailwind layer, which this sheet deliberately does not ship). `h6`
+    // has no rule in either place and falls back to the browser default.
+    h5 {
+      font-size: 1.125em;
+      font-weight: 600;
+      margin-top: 1.25em;
+      margin-bottom: 0.75em;
+    }
+
+    // Task list checkboxes are a rendering of state, not a control: the page
+    // has nowhere to save a click to.
+    ul[data-type="taskList"] li label input[type="checkbox"] {
+      cursor: default;
+      pointer-events: none;
+    }
+
+    // An `imageUpload` node is an upload that never finished — a placeholder
+    // the editor draws with a node view. There is nothing to show for it.
+    [data-type="imageUpload"] {
+      display: none;
+    }
+  }
+}

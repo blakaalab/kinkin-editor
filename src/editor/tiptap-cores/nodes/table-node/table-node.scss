@@ -1,8 +1,59 @@
-.tiptap-core.ProseMirror {
+@use "../../styles/tokens" as t;
+
+//
+// The table node view wraps the table in `.table-node-wrapper >
+// .table-scroll-container`; the schema-only extension used for static
+// rendering emits the same two wrappers, so these rules hold in both places.
+//
+@mixin content {
   .table-node-wrapper {
     position: relative;
     margin: 1.75em 0;
+  }
 
+  .table-scroll-container {
+    overflow-x: auto;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .table-scroll-container table {
+    border-collapse: collapse;
+    width: 100%;
+
+    th,
+    td {
+      border: 1px solid t.token("table-border");
+      padding: 0.5em 0.75em;
+      vertical-align: top;
+      text-align: left;
+      min-width: 80px;
+
+      > *:first-child {
+        margin-top: 0;
+      }
+
+      > *:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    th {
+      background-color: t.token("table-header-bg");
+
+      p {
+        font-weight: 600;
+      }
+    }
+
+    tr:nth-child(even) td {
+      background-color: t.token("table-stripe-bg");
+    }
+  }
+}
+
+@mixin editor {
+  .table-node-wrapper {
     &:hover .table-add-col-btn,
     &:hover .table-add-row-btn {
       opacity: 1;
@@ -50,8 +101,8 @@
     justify-content: center;
     padding: 1px 6px;
     cursor: grab;
-    color: var(--tt-core-table-control-color);
-    background-color: var(--tt-core-table-control-bg);
+    color: t.token("table-control-color");
+    background-color: t.token("table-control-bg");
     border-radius: 4px;
     opacity: 0;
     transition: opacity 0.15s, background-color 0.15s, color 0.15s;
@@ -65,8 +116,8 @@
     }
 
     &:hover {
-      background-color: var(--tt-core-table-control-hover-bg);
-      color: var(--tt-core-table-control-hover-color);
+      background-color: t.token("table-control-hover-bg");
+      color: t.token("table-control-hover-color");
     }
 
     &:active {
@@ -88,19 +139,19 @@
     align-items: center;
     justify-content: center;
     border: none;
-    border-left: 1px dashed var(--tt-core-table-border);
+    border-left: 1px dashed t.token("table-border");
     border-radius: 0 4px 4px 0;
     background: transparent;
-    color: var(--tt-core-table-control-color);
+    color: t.token("table-control-color");
     cursor: pointer;
     padding: 0;
     opacity: 0;
     transition: all 0.15s ease;
 
     &:hover {
-      border-left-color: var(--tt-core-dropcursor);
-      color: var(--tt-core-dropcursor);
-      background-color: var(--tt-core-selection);
+      border-left-color: t.token("dropcursor");
+      color: t.token("dropcursor");
+      background-color: t.token("selection");
     }
   }
 
@@ -124,8 +175,8 @@
     justify-content: center;
     padding: 6px 1px;
     cursor: grab;
-    color: var(--tt-core-table-control-color);
-    background-color: var(--tt-core-table-control-bg);
+    color: t.token("table-control-color");
+    background-color: t.token("table-control-bg");
     border-radius: 4px;
     opacity: 0;
     transition: opacity 0.15s, background-color 0.15s, color 0.15s;
@@ -139,8 +190,8 @@
     }
 
     &:hover {
-      background-color: var(--tt-core-table-control-hover-bg);
-      color: var(--tt-core-table-control-hover-color);
+      background-color: t.token("table-control-hover-bg");
+      color: t.token("table-control-hover-color");
     }
 
     &:active {
@@ -159,10 +210,10 @@
     height: 16px;
     margin-top: 4px;
     border: none;
-    border-top: 1px dashed var(--tt-core-table-border);
+    border-top: 1px dashed t.token("table-border");
     border-radius: 0 0 4px 4px;
     background: transparent;
-    color: var(--tt-core-table-control-color);
+    color: t.token("table-control-color");
     cursor: pointer;
     padding: 0;
     opacity: 0;
@@ -170,9 +221,9 @@
     transition: all 0.15s ease;
 
     &:hover {
-      border-top-color: var(--tt-core-dropcursor);
-      color: var(--tt-core-dropcursor);
-      background-color: var(--tt-core-selection);
+      border-top-color: t.token("dropcursor");
+      color: t.token("dropcursor");
+      background-color: t.token("selection");
     }
   }
 
@@ -180,48 +231,10 @@
     position: relative;
   }
 
-  .table-scroll-container {
-    overflow-x: auto;
-    flex: 1;
-    min-width: 0;
-  }
-
   .table-scroll-container table {
-    border-collapse: collapse;
-    width: 100%;
-
-    th,
-    td {
-      border: 1px solid var(--tt-core-table-border);
-      padding: 0.5em 0.75em;
-      vertical-align: top;
-      text-align: left;
-      min-width: 80px;
-
-      > *:first-child {
-        margin-top: 0;
-      }
-
-      > *:last-child {
-        margin-bottom: 0;
-      }
-    }
-
-    th {
-      background-color: var(--tt-core-table-header-bg);
-
-      p {
-        font-weight: 600;
-      }
-    }
-
-    tr:nth-child(even) td {
-      background-color: var(--tt-core-table-stripe-bg);
-    }
-
     th.selectedCell,
     td.selectedCell {
-      background-color: var(--tt-core-selection);
+      background-color: t.token("selection");
       position: relative;
 
       &::after {
@@ -231,7 +244,7 @@
         left: -1px;
         right: -1px;
         bottom: -1px;
-        border: 2px solid var(--tt-core-dropcursor);
+        border: 2px solid t.token("dropcursor");
         pointer-events: none;
         z-index: 1;
       }
@@ -261,104 +274,106 @@
 
     &.table-drag-indicator-col {
       width: 2px;
-      background-color: var(--tt-core-dropcursor);
+      background-color: t.token("dropcursor");
       border-radius: 1px;
     }
 
     &.table-drag-indicator-row {
       height: 2px;
-      background-color: var(--tt-core-dropcursor);
+      background-color: t.token("dropcursor");
       border-radius: 1px;
     }
   }
-
 }
 
-.table-control-dropdown {
-  position: fixed;
-  z-index: 100;
-  min-width: 160px;
-  background: var(--tt-core-dropdown-bg);
-  border: 1px solid var(--tt-core-dropdown-border);
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-  padding: 4px;
-  animation: table-dropdown-in 0.1s ease-out;
-}
-
-@keyframes table-dropdown-in {
-  from {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.table-control-dropdown-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 6px 10px;
-  font-size: 13px;
-  color: var(--tt-core-dropdown-text);
-  background: none;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  text-align: left;
-  outline: none;
-  transition: background-color 0.1s;
-
-  &:hover,
-  &.focused {
-    background-color: var(--tt-core-dropdown-hover-bg);
+// Dropdowns and drag previews are appended to `document.body`.
+@mixin editor-global {
+  .table-control-dropdown {
+    position: fixed;
+    z-index: 100;
+    min-width: 160px;
+    background: t.token("dropdown-bg");
+    border: 1px solid t.token("dropdown-border");
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    padding: 4px;
+    animation: table-dropdown-in 0.1s ease-out;
   }
 
-  &.destructive {
-    color: var(--tt-core-dropdown-destructive);
+  @keyframes table-dropdown-in {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .table-control-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 6px 10px;
+    font-size: 13px;
+    color: t.token("dropdown-text");
+    background: none;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: left;
+    outline: none;
+    transition: background-color 0.1s;
 
     &:hover,
     &.focused {
-      background-color: var(--tt-core-dropdown-destructive-bg);
+      background-color: t.token("dropdown-hover-bg");
+    }
+
+    &.destructive {
+      color: t.token("dropdown-destructive");
+
+      &:hover,
+      &.focused {
+        background-color: t.token("dropdown-destructive-bg");
+      }
+    }
+
+    svg {
+      flex-shrink: 0;
     }
   }
 
-  svg {
-    flex-shrink: 0;
-  }
-}
+  .table-drag-preview {
+    position: fixed;
+    z-index: 1000;
+    pointer-events: none;
+    opacity: 0.7;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
 
-.table-drag-preview {
-  position: fixed;
-  z-index: 1000;
-  pointer-events: none;
-  opacity: 0.7;
-  border-radius: 4px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  overflow: hidden;
-
-  th,
-  td {
-    border: 1px solid var(--tt-core-table-border, #e2e8f0);
-    padding: 0.5em 0.75em;
-    vertical-align: top;
-    text-align: left;
-    box-sizing: border-box;
-  }
-
-  th {
-    background-color: var(--tt-core-table-header-bg, #f8fafc);
-
-    p {
-      font-weight: 600;
+    th,
+    td {
+      border: 1px solid t.token("table-border");
+      padding: 0.5em 0.75em;
+      vertical-align: top;
+      text-align: left;
+      box-sizing: border-box;
     }
-  }
 
-  td {
-    background-color: var(--tt-core-bg, #fff);
+    th {
+      background-color: t.token("table-header-bg");
+
+      p {
+        font-weight: 600;
+      }
+    }
+
+    td {
+      background-color: t.token("bg");
+    }
   }
 }
