@@ -1,6 +1,6 @@
 {
   "name": "@blakaa/kinkin-editor",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "A drop-in rich text editor for React - a Notion-style WYSIWYG built on Tiptap, with slash commands, tables, images, markdown I/O and streaming AI Assist.",
   "license": "MIT",
   "type": "module",
