@@ -198,6 +198,7 @@ separate `--tt-core-*` namespace, overridable the same way:
   --tt-core-table-header-bg: #fafafa;
   --tt-core-link: #2563eb;
   --tt-core-selection: #dbeafe;
+  --tt-core-selection-text: #1f2937;  /* selected text; defaults to --color-foreground */
 }
 ```
 

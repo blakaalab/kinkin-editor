@@ -35,6 +35,20 @@
 @include paragraph.editor-global;
 @include table.editor-global;
 
+// prosemirror-dropcursor appends its indicator to `editorView.dom.offsetParent`
+// and only paints an inline colour when one is passed — and `color: false` is
+// passed deliberately, so the stylesheet owns it. With nothing inside the scope
+// positioned, that offsetParent resolves to `<body>`: the element lands outside
+// `.kinkin-editor`, where the published (scoped) rule colouring it cannot match,
+// and the indicator paints nothing. Positioning the scope root keeps the element
+// inside the scope however the editor is composed.
+//
+// The portal root carries the same class and must stay static — menus, tooltips
+// and drag previews position against it.
+.kinkin-editor:not([data-kinkin-portal-root]) {
+  position: relative;
+}
+
 .tiptap-core.ProseMirror * {
   outline: none;
 }
@@ -49,6 +63,9 @@
   ):not(.ProseMirror-focused)
   ::selection {
   background: transparent;
+  // Without this, a host app's `::selection { color }` still applies and the
+  // "hidden" selection shows up as recoloured text.
+  color: t.token("selection-text");
 }
 
 span.tiptap-core-slash-decoration.is-empty::after {
