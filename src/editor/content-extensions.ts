@@ -7,6 +7,7 @@ import { Mention } from "@tiptap/extension-mention";
 import { Strike } from "@tiptap/extension-strike";
 import { TableCell, TableHeader, TableRow } from "@tiptap/extension-table";
 import { TableOfContents } from "@tiptap/extension-table-of-contents";
+import { TextAlign } from "@tiptap/extension-text-align";
 import { Color, TextStyle } from "@tiptap/extension-text-style";
 import { UniqueID } from "@tiptap/extension-unique-id";
 import type { StarterKitOptions } from "@tiptap/starter-kit";
@@ -89,6 +90,17 @@ export const ContentEmoji = Emoji.configure({
 export const ContentUniqueId = UniqueID.configure({ types: UNIQUE_ID_TYPES });
 
 /**
+ * Alignment is a block attribute rendered as an inline `text-align` style, so
+ * it belongs to the document, not the editor. Table cells are deliberately not
+ * listed: `@tiptap/extension-table` gives them their own `align` attribute, and
+ * two attributes writing the same style would fight. Aligning the paragraph
+ * inside a cell works either way.
+ */
+export const ContentTextAlign = TextAlign.configure({
+  types: ["heading", "paragraph"],
+});
+
+/**
  * Every extension that shapes the document: nodes, marks and the attributes on
  * them, and nothing that only exists to make editing work.
  *
@@ -130,6 +142,7 @@ export const createContentExtensions = (): Extensions => [
   AiAssistStrike,
   AiAssistHighlight,
   ContentUniqueId,
+  ContentTextAlign,
   Image,
   ImageUploadNode,
   // Not a rendering concern at first glance, but it owns the `id` and

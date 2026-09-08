@@ -27,6 +27,7 @@ import {
   TiptapToolbarGroup,
   TiptapToolbarSeparator,
 } from "@/editor/tiptap-cores/ui/base/tiptap-toolbar";
+import { ColorMenu } from "@/editor/tiptap-cores/ui/color-button";
 import { FloatingElement } from "@/editor/tiptap-cores/ui/floating-element";
 import { HorizontalRuleButton } from "@/editor/tiptap-cores/ui/horizontal-rule-button";
 import { LinkPopoverContent } from "@/editor/tiptap-cores/ui/link";
@@ -170,6 +171,8 @@ export const SelectionToolbar = ({
             <MarkButton type="bold" hideWhenUnavailable />
             <MarkButton type="italic" hideWhenUnavailable />
             <MarkButton type="underline" hideWhenUnavailable />
+            <ColorMenu type="text" />
+            <ColorMenu type="highlight" />
           </TiptapToolbarGroup>
 
           <TiptapToolbarSeparator />

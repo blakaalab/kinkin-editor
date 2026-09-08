@@ -27,6 +27,7 @@ import {
 } from "@/editor/tiptap-cores/ui/base/tiptap-toolbar";
 import { BlockquoteButton } from "@/editor/tiptap-cores/ui/blockquote-button";
 import { CodeBlockButton } from "@/editor/tiptap-cores/ui/code-block-button";
+import { ColorMenu } from "@/editor/tiptap-cores/ui/color-button";
 import { useHeading } from "@/editor/tiptap-cores/ui/heading-button/use-heading";
 import { HorizontalRuleButton } from "@/editor/tiptap-cores/ui/horizontal-rule-button";
 import { LinkPopoverContent } from "@/editor/tiptap-cores/ui/link";
@@ -34,6 +35,7 @@ import { useList } from "@/editor/tiptap-cores/ui/list-button/use-list";
 import { MarkButton } from "@/editor/tiptap-cores/ui/mark-button";
 import { useParagraph } from "@/editor/tiptap-cores/ui/paragraph-button/use-paragraph";
 import { SlashCommandTriggerButton } from "@/editor/tiptap-cores/ui/slash-command-suggestion-menu/slash-command-trigger-button";
+import { TextAlignMenu } from "@/editor/tiptap-cores/ui/text-align-button";
 
 const BlockTypeMenu = () => {
   const { editor } = useTiptapEditor();
@@ -324,11 +326,19 @@ export const FixedToolbar = ({
       <TiptapToolbarSeparator />
 
       <TiptapToolbarGroup>
+        <TextAlignMenu />
+      </TiptapToolbarGroup>
+
+      <TiptapToolbarSeparator />
+
+      <TiptapToolbarGroup>
         <MarkButton type="bold" />
         <MarkButton type="italic" />
         <MarkButton type="underline" />
         <MarkButton type="strike" />
         <MarkButton type="code" />
+        <ColorMenu type="text" />
+        <ColorMenu type="highlight" />
       </TiptapToolbarGroup>
 
       <TiptapToolbarSeparator />

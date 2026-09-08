@@ -69,6 +69,8 @@ Task list, Quote, Code, Emoji, Table, Image, Columns (2–4), Horizontal line.
 - Tables with column/row controls and drag-to-reorder
 - Columns — 2 to 4 side by side, holding any block, stacking on narrow screens
 - Link editing, code blocks, task lists, highlights, typography substitutions
+- Text alignment, text colour and highlight colour, from the toolbar or the
+  selection toolbar
 - Image upload through a callback you supply
 - Streaming AI Assist — improve, continue, summarize, fix grammar, simplify,
   shorten, extend, translate, change tone, or a custom prompt
@@ -97,7 +99,7 @@ need them explicitly (brace expansion keeps it to two lines):
 ```bash
 yarn add @blakaa/kinkin-editor
 yarn add react react-dom \
-  @tiptap/{core,react,pm,starter-kit,extensions,markdown,suggestion,extension-emoji,extension-highlight,extension-history,extension-horizontal-rule,extension-image,extension-list,extension-mention,extension-strike,extension-table,extension-table-of-contents,extension-text-style,extension-typography,extension-unique-id,extension-drag-handle-react}
+  @tiptap/{core,react,pm,starter-kit,extensions,markdown,suggestion,extension-emoji,extension-highlight,extension-history,extension-horizontal-rule,extension-image,extension-list,extension-mention,extension-strike,extension-table,extension-table-of-contents,extension-text-align,extension-text-style,extension-typography,extension-unique-id,extension-drag-handle-react}
 ```
 
 ### Why peer dependencies at all
@@ -189,6 +191,11 @@ inside:
   --font-sans: "Inter", system-ui, sans-serif;
 }
 ```
+
+A colour an author picks from the text-colour or highlight menu is **not** part
+of the theme: it is written into the document itself (`<span style="color: …">`),
+so it renders the same everywhere and does not follow a consumer into a dark
+theme. Theme tokens style the chrome and the content the author did not colour.
 
 Editor *content* styling (code blocks, tables, task lists, blockquotes) uses a
 separate `--tt-core-*` namespace, overridable the same way:
@@ -343,7 +350,7 @@ programmatic edits — useful for skipping autosave on non-user changes.
 
 | Export | Behaviour |
 | --- | --- |
-| `<FixedToolbar showAiAssist? className? />` | Persistent bar. Pass via the `toolbar` prop. Undo/redo, block type (paragraph, H1–H4), lists (bullet/numbered/task), bold/italic/underline/strike/code, blockquote, code block, horizontal rule, link, table, image, slash trigger, AI Assist. |
+| `<FixedToolbar showAiAssist? className? />` | Persistent bar. Pass via the `toolbar` prop. Undo/redo, block type (paragraph, H1–H4), lists (bullet/numbered/task), bold/italic/underline/strike/code, text colour, highlight, alignment, blockquote, code block, horizontal rule, link, table, image, columns, slash trigger, AI Assist. |
 | `<SelectionToolbar />` | Floats over selected text on desktop. Rendered automatically. |
 | `<MobileToolbar />` | Docks to the bottom under 480px. Rendered automatically. |
 
