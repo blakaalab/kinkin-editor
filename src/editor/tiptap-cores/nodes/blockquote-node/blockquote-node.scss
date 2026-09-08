@@ -6,12 +6,16 @@
 // `content` is what a saved document needs to look right; `editor` is
 // editing affordances that a rendered page has no use for.
 //
+// The quote's own vertical padding, shared with the bar below so the two cannot
+// drift apart.
+$vertical-padding: 0.375em;
+
 @mixin content {
   blockquote {
     position: relative;
     padding-left: 1em;
-    padding-top: 0.375em;
-    padding-bottom: 0.375em;
+    padding-top: $vertical-padding;
+    padding-bottom: $vertical-padding;
     margin: 1.125em 0;
     font-size: 1em;
 
@@ -20,13 +24,14 @@
       margin-bottom: 0.25em;
     }
 
+    // Inset by the padding rather than running the full box height: the bar
+    // marks the text, so it should not stand taller than the text does.
     &::before,
     &.is-empty::before {
       position: absolute;
-      bottom: 0;
+      top: $vertical-padding;
+      bottom: $vertical-padding;
       left: 0;
-      top: 0;
-      height: 100%;
       width: 0.25em;
       border-radius: 0.1em;
       background-color: t.token("blockquote");
