@@ -10,6 +10,7 @@ import {
 
 import {
   flip,
+  type OpenChangeReason,
   offset,
   shift,
   type UseFloatingOptions,
@@ -81,8 +82,16 @@ export const FloatingElement = forwardRef<HTMLDivElement, FloatingElementProps>(
       [onOpenChange],
     );
 
-    const handleFloatingOpenChange = (open: boolean) => {
-      if (!open && editor) {
+    const handleFloatingOpenChange = (
+      open: boolean,
+      _event?: Event,
+      reason?: OpenChangeReason,
+    ) => {
+      // Escape is the one dismissal that means "I'm done with this range":
+      // drop it and put the caret back in the text. Every other dismissal must
+      // leave the selection alone -- collapsing it here is what used to wipe
+      // the user's selection the moment they reached for a toolbar dropdown.
+      if (!open && reason === "escape-key" && editor) {
         requestAnimationFrame(() => {
           editor.commands.setTextSelection(editor.state.selection.to);
           editor.commands.focus();
