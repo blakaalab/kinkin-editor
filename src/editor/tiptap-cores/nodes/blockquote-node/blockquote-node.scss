@@ -21,7 +21,15 @@ $vertical-padding: 0.375em;
 
     p {
       margin-top: 0;
+      // Separates one paragraph of a quote from the next.
       margin-bottom: 0.25em;
+
+      // The last one has nothing to separate from, and the margin sits inside
+      // the quote's content box: the bar below is inset by the padding, so it
+      // would cover this and stand 4px lower than the text it marks.
+      &:last-child {
+        margin-bottom: 0;
+      }
     }
 
     // Inset by the padding rather than running the full box height: the bar
