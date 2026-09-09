@@ -363,7 +363,7 @@ export const RichTextEditor = ({
       <EditorContext.Provider value={{ editor }}>
         {toolbar ? (
           <>
-            <div className="shrink-0 border-b border-gray-200 bg-white">
+            <div className="shrink-0 border-b border-border-subtle bg-background">
               {toolbar}
             </div>
             <div className="flex-1 min-h-0 overflow-y-auto">{contentArea}</div>

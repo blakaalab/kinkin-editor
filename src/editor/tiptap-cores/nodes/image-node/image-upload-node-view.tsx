@@ -71,8 +71,8 @@ const UploadArea = ({
       className={cn(
         "flex flex-col items-center justify-center gap-2 rounded-md border border-dashed py-8 cursor-pointer transition-colors",
         isDragging
-          ? "border-blue-500 bg-blue-100"
-          : "border-gray-500 bg-white hover:border-blue-500 hover:bg-blue-50",
+          ? "border-primary-500 bg-primary-100"
+          : "border-gray-500 bg-background hover:border-primary-500 hover:bg-primary-50",
       )}
     >
       <input
@@ -84,19 +84,19 @@ const UploadArea = ({
       />
       {isDragging ? (
         <>
-          <Upload className="size-6 text-blue-500" strokeWidth={1.5} />
-          <span className="text-sm text-blue-700 font-medium">
+          <Upload className="size-6 text-primary-500" strokeWidth={1.5} />
+          <span className="text-sm text-primary-700 font-medium">
             Drop your image here
           </span>
         </>
       ) : (
         <>
-          <ImageIcon className="size-6 text-gray-400" strokeWidth={1.5} />
-          <span className="text-sm text-gray-600">
+          <ImageIcon className="size-6 text-placeholder" strokeWidth={1.5} />
+          <span className="text-sm text-control">
             Drop your image here or{" "}
-            <span className="text-blue-600 font-medium">Choose file</span>
+            <span className="text-primary-600 font-medium">Choose file</span>
           </span>
-          <span className="text-xs text-gray-400">
+          <span className="text-xs text-placeholder">
             PNG, JPG, GIF, WebP, SVG
           </span>
         </>
@@ -106,15 +106,15 @@ const UploadArea = ({
 };
 
 const UploadProgress = ({ progress }: { progress: number }) => (
-  <div className="flex items-center gap-3 rounded-md border border-dashed border-gray-300 bg-gray-50 p-4">
+  <div className="flex items-center gap-3 rounded-md border border-dashed border-gray-300 bg-background p-4">
     <div className="relative">
-      <ImageIcon className="size-5 text-gray-400" />
+      <ImageIcon className="size-5 text-placeholder" />
     </div>
     <div className="flex-1 min-w-0">
-      <div className="text-sm text-gray-600">Uploading image...</div>
-      <div className="mt-1.5 h-1.5 rounded-full bg-gray-200 overflow-hidden">
+      <div className="text-sm text-control">Uploading image...</div>
+      <div className="mt-1.5 h-1.5 rounded-full bg-accent overflow-hidden">
         <div
-          className="h-full rounded-full bg-blue-500 transition-all duration-300"
+          className="h-full rounded-full bg-primary-500 transition-all duration-300"
           style={{ width: `${Math.max(progress, 5)}%` }}
         />
       </div>

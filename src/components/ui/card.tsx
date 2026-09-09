@@ -14,16 +14,18 @@ const cardVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-white text-foreground border shadow-xs py-6 gap-6",
-        secondary: "bg-gray-200 text-foreground py-4 gap-2",
+        default:
+          "bg-background text-foreground border border-border shadow-xs py-6 gap-6",
+        secondary: "bg-accent text-foreground py-4 gap-2",
         rich: "bg-linear-to-b from-[#2269B5] to-[#004085] text-white py-10 gap-9",
-        plain: "bg-white text-foreground border shadow-xs gap-6",
+        plain:
+          "bg-background text-foreground border border-border shadow-xs gap-6",
         gray: "bg-purple-50 text-gray-500 w-full p-3 pb-2 sm:p-6 sm:pb-4",
         green: "bg-green-100 text-green-800 w-full p-3 pb-2 sm:p-6 sm:pb-4",
         yellow: "bg-amber-100 text-amber-800 w-full p-3 pb-2 sm:p-6 sm:pb-4",
         blue: "bg-pale-blue text-blue-700 w-full p-3 pb-2 sm:p-6 sm:pb-4",
         red: "bg-red-100 text-red-800 w-full p-3 pb-2 sm:p-6 sm:pb-4",
-        outline: "text-gray-600 border shadow-none py-6 gap-6",
+        outline: "text-control border border-border shadow-none py-6 gap-6",
       },
       interactive: {
         true: "cursor-pointer hover:border-primary-700 active:bg-active",
@@ -126,7 +128,7 @@ function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="card-description"
-      className={cn("text-sm text-gray-400", className)}
+      className={cn("text-sm text-placeholder", className)}
       {...props}
     />
   );

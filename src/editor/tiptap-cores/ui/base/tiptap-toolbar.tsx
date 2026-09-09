@@ -31,9 +31,9 @@ export const TiptapToolbar = forwardRef<HTMLDivElement, TiptapToolbarProps>(
           "[&>[data-toolbar-group]:empty+[data-toolbar-separator]]:hidden",
           "[&>[data-toolbar-separator]:has(+[data-toolbar-group]:empty)]:hidden",
           variant === "fixed" &&
-            "fixed bottom-0 z-10 w-full min-h-11 bg-white border-t border-gray-200 px-2 overflow-x-auto overscroll-x-contain flex-nowrap justify-start",
+            "fixed bottom-0 z-10 w-full min-h-11 bg-background border-t border-border-subtle px-2 overflow-x-auto overscroll-x-contain flex-nowrap justify-start",
           variant === "floating" &&
-            "p-0.5 rounded-lg border border-gray-200 bg-white shadow-xl outline-none overflow-hidden",
+            "p-0.5 rounded-lg border border-border-subtle bg-background shadow-xl outline-none overflow-hidden",
           className,
         )}
         {...props}

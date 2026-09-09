@@ -167,11 +167,19 @@ portal로 렌더링되는 UI(메뉴, 툴팁, 드래그 미리보기, 모바일 �
 
 ```css
 .kinkin-editor {
-  --color-primary-700: #7c3aed;  /* 강조색: 활성 버튼, 포커스 링 */
-  --color-foreground: #1f2937;   /* 본문 텍스트 */
-  --color-background: #ffffff;
-  --color-border: #e5e7eb;
-  --color-muted-foreground: #6b7280;
+  --color-background: #ffffff;        /* 표면: 툴바, 메뉴, 대화상자 */
+  --color-foreground: #1f2937;        /* 본문 텍스트 */
+  --color-control: #4b5563;           /* 툴바와 메뉴의 레이블, 아이콘 */
+  --color-muted-foreground: #6b7280;  /* 보조 텍스트 */
+  --color-placeholder: #9ca3af;       /* 플레이스홀더, 보조 아이콘 */
+  --color-accent: #f3f4f6;            /* 호버 표면 */
+  --color-accent-foreground: #111827; /* 켜진 버튼의 레이블 */
+  --color-selected: #ede9fe;          /* 켜진 버튼의 표면 */
+  --color-border: #e5e7eb;            /* 구분선, 색상 견본 테두리 */
+  --color-border-subtle: #f3f4f6;     /* UI를 감싸는 얇은 선 */
+  --color-ring: #7c3aed;              /* 포커스 링 */
+  --color-primary-700: #7c3aed;       /* 강조 계열: AI, 업로드, 링크 */
+  --color-brand: #7c3aed;             /* 목차의 활성 항목 */
   --font-sans: "Inter", system-ui, sans-serif;
 }
 ```

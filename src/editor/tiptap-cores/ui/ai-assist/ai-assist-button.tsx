@@ -45,7 +45,7 @@ export const AiAssistButton = forwardRef<
         aria-label="AI Assist"
         tooltip="AI Assist"
         onClick={handleClick}
-        className={cn("text-blue-500", className)}
+        className={cn("text-primary-500", className)}
         showTooltip={showTooltip}
         {...buttonProps}
         ref={ref}

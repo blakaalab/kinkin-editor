@@ -92,14 +92,14 @@ export const TiptapButton = forwardRef<HTMLButtonElement, TiptapButtonProps>(
     const buttonClassName = cn(
       "flex items-center gap-1.5 cursor-pointer",
       "h-8 min-w-8 px-2 rounded-lg text-sm font-medium",
-      "bg-transparent text-gray-600 hover:bg-gray-200",
+      "bg-transparent text-control hover:bg-accent",
       "transition-colors",
       "focus-visible:outline-none",
       "disabled:pointer-events-none disabled:opacity-50",
-      isToggled && "bg-blue-200! text-gray-900! text-blue-700!",
-      isFocused && !isToggled && "bg-gray-200",
+      isToggled && "bg-selected! text-accent-foreground!",
+      isFocused && !isToggled && "bg-accent",
       // Ariakit's keyboard navigation: highlight active item unless toggled
-      !isToggled && "data-[active-item]:bg-gray-200",
+      !isToggled && "data-[active-item]:bg-accent",
       !isToggled &&
         !isFocused &&
         "group-data-[keyboard-active]/keyboard:hover:bg-transparent",

@@ -183,11 +183,19 @@ inside:
 
 ```css
 .kinkin-editor {
-  --color-primary-700: #7c3aed;  /* accent: active buttons, focus rings */
-  --color-foreground: #1f2937;   /* body text */
-  --color-background: #ffffff;
-  --color-border: #e5e7eb;
-  --color-muted-foreground: #6b7280;
+  --color-background: #ffffff;        /* surfaces: toolbar, menus, dialogs */
+  --color-foreground: #1f2937;        /* primary text */
+  --color-control: #4b5563;           /* toolbar and menu labels, icons */
+  --color-muted-foreground: #6b7280;  /* secondary text */
+  --color-placeholder: #9ca3af;       /* placeholders, hint icons */
+  --color-accent: #f3f4f6;            /* hover surfaces */
+  --color-accent-foreground: #111827; /* label on a button that is switched on */
+  --color-selected: #ede9fe;          /* surface of a button that is switched on */
+  --color-border: #e5e7eb;            /* dividers, colour-swatch outlines */
+  --color-border-subtle: #f3f4f6;     /* hairlines framing the chrome */
+  --color-ring: #7c3aed;              /* focus ring */
+  --color-primary-700: #7c3aed;       /* accent ramp: AI, upload, links */
+  --color-brand: #7c3aed;             /* table-of-contents active item */
   --font-sans: "Inter", system-ui, sans-serif;
 }
 ```

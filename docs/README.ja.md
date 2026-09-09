@@ -170,11 +170,19 @@ portal で描画される UI（メニュー、ツールチップ、ドラッグ�
 
 ```css
 .kinkin-editor {
-  --color-primary-700: #7c3aed;  /* アクセント: アクティブなボタン、フォーカスリング */
-  --color-foreground: #1f2937;   /* 本文テキスト */
-  --color-background: #ffffff;
-  --color-border: #e5e7eb;
-  --color-muted-foreground: #6b7280;
+  --color-background: #ffffff;        /* 面: ツールバー、メニュー、ダイアログ */
+  --color-foreground: #1f2937;        /* 本文テキスト */
+  --color-control: #4b5563;           /* ツールバーとメニューのラベル、アイコン */
+  --color-muted-foreground: #6b7280;  /* 補助テキスト */
+  --color-placeholder: #9ca3af;       /* プレースホルダー、補助アイコン */
+  --color-accent: #f3f4f6;            /* ホバー時の面 */
+  --color-accent-foreground: #111827; /* オンになっているボタンのラベル */
+  --color-selected: #ede9fe;          /* オンになっているボタンの面 */
+  --color-border: #e5e7eb;            /* 区切り線、カラーチップの枠 */
+  --color-border-subtle: #f3f4f6;     /* UI を囲むヘアライン */
+  --color-ring: #7c3aed;              /* フォーカスリング */
+  --color-primary-700: #7c3aed;       /* アクセント: AI、アップロード、リンク */
+  --color-brand: #7c3aed;             /* 目次のアクティブ項目 */
   --font-sans: "Inter", system-ui, sans-serif;
 }
 ```

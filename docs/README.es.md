@@ -172,11 +172,19 @@ hay dentro.
 
 ```css
 .kinkin-editor {
-  --color-primary-700: #7c3aed;  /* acento: botones activos, anillos de foco */
-  --color-foreground: #1f2937;   /* texto del cuerpo */
-  --color-background: #ffffff;
-  --color-border: #e5e7eb;
-  --color-muted-foreground: #6b7280;
+  --color-background: #ffffff;        /* superficies: barra, menús, diálogos */
+  --color-foreground: #1f2937;        /* texto del cuerpo */
+  --color-control: #4b5563;           /* etiquetas e iconos de barra y menús */
+  --color-muted-foreground: #6b7280;  /* texto secundario */
+  --color-placeholder: #9ca3af;       /* marcadores de posición, iconos de ayuda */
+  --color-accent: #f3f4f6;            /* superficies al pasar el cursor */
+  --color-accent-foreground: #111827; /* etiqueta de un botón activo */
+  --color-selected: #ede9fe;          /* superficie de un botón activo */
+  --color-border: #e5e7eb;            /* separadores, borde de las muestras de color */
+  --color-border-subtle: #f3f4f6;     /* líneas finas que enmarcan la interfaz */
+  --color-ring: #7c3aed;              /* anillo de foco */
+  --color-primary-700: #7c3aed;       /* rampa de acento: IA, subida, enlaces */
+  --color-brand: #7c3aed;             /* elemento activo del índice */
   --font-sans: "Inter", system-ui, sans-serif;
 }
 ```

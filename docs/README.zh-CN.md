@@ -163,11 +163,19 @@ Tailwind —— 发布出来的就是普通的编译后 CSS。
 
 ```css
 .kinkin-editor {
-  --color-primary-700: #7c3aed;  /* 强调色：激活按钮、聚焦环 */
-  --color-foreground: #1f2937;   /* 正文文字 */
-  --color-background: #ffffff;
-  --color-border: #e5e7eb;
-  --color-muted-foreground: #6b7280;
+  --color-background: #ffffff;        /* 表面：工具栏、菜单、对话框 */
+  --color-foreground: #1f2937;        /* 正文文字 */
+  --color-control: #4b5563;           /* 工具栏与菜单的文字、图标 */
+  --color-muted-foreground: #6b7280;  /* 次要文字 */
+  --color-placeholder: #9ca3af;       /* 占位文字、提示图标 */
+  --color-accent: #f3f4f6;            /* 悬停表面 */
+  --color-accent-foreground: #111827; /* 已启用按钮的文字 */
+  --color-selected: #ede9fe;          /* 已启用按钮的表面 */
+  --color-border: #e5e7eb;            /* 分隔线、色板描边 */
+  --color-border-subtle: #f3f4f6;     /* 包裹界面的细线 */
+  --color-ring: #7c3aed;              /* 聚焦环 */
+  --color-primary-700: #7c3aed;       /* 强调色阶：AI、上传、链接 */
+  --color-brand: #7c3aed;             /* 目录中的当前条目 */
   --font-sans: "Inter", system-ui, sans-serif;
 }
 ```

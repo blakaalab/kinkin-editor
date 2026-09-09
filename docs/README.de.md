@@ -174,11 +174,19 @@ Es wird in einen Container portaliert, der dieselbe Klasse trägt und über
 
 ```css
 .kinkin-editor {
-  --color-primary-700: #7c3aed;  /* Akzent: aktive Buttons, Fokusringe */
-  --color-foreground: #1f2937;   /* Fließtext */
-  --color-background: #ffffff;
-  --color-border: #e5e7eb;
-  --color-muted-foreground: #6b7280;
+  --color-background: #ffffff;        /* Flächen: Toolbar, Menüs, Dialoge */
+  --color-foreground: #1f2937;        /* Fließtext */
+  --color-control: #4b5563;           /* Beschriftungen und Icons in Toolbar und Menüs */
+  --color-muted-foreground: #6b7280;  /* sekundärer Text */
+  --color-placeholder: #9ca3af;       /* Platzhalter, Hinweis-Icons */
+  --color-accent: #f3f4f6;            /* Hover-Flächen */
+  --color-accent-foreground: #111827; /* Beschriftung eines aktiven Buttons */
+  --color-selected: #ede9fe;          /* Fläche eines aktiven Buttons */
+  --color-border: #e5e7eb;            /* Trenner, Umrandung der Farbfelder */
+  --color-border-subtle: #f3f4f6;     /* Haarlinien um die Oberfläche */
+  --color-ring: #7c3aed;              /* Fokusring */
+  --color-primary-700: #7c3aed;       /* Akzentrampe: KI, Upload, Links */
+  --color-brand: #7c3aed;             /* aktiver Eintrag im Inhaltsverzeichnis */
   --font-sans: "Inter", system-ui, sans-serif;
 }
 ```

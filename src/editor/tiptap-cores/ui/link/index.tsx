@@ -77,7 +77,7 @@ export function LinkPopoverContent({
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="off"
-              className="block w-full h-8 text-sm font-normal leading-normal py-1.5 px-2 rounded-md bg-transparent appearance-none outline-none placeholder:text-gray-400"
+              className="block w-full h-8 text-sm font-normal leading-normal py-1.5 px-2 rounded-md bg-transparent appearance-none outline-none placeholder:text-placeholder"
             />
           </div>
 

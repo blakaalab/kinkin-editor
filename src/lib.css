@@ -59,15 +59,24 @@
   --color-primary-900: #102959;
   --color-primary-950: #04132f;
 
-  --color-background: #fbfcff;
-  --color-foreground: #2e3c47;
-  --color-placeholder: #a6aeba;
-  --color-border: #e2e2e2;
-  --color-ring: #1c85f5;
-  --color-selected: #fbfcff;
+  /*
+   * Semantic tokens for the editor's chrome — toolbars, menus, buttons,
+   * dialogs. These are the theming surface: override them on `.kinkin-editor`
+   * and the UI follows. The palettes above are the raw ramps behind them.
+   */
+  --color-background: #ffffff; /* chrome surfaces */
+  --color-foreground: #2e3c47; /* primary text on those surfaces */
+  --color-control: #62748e; /* toolbar and menu labels, icons */
+  --color-muted: #fafbfb; /* recessed surfaces */
+  --color-muted-foreground: #778397; /* secondary text */
+  --color-placeholder: #a6aeba; /* placeholders, hint icons */
+  --color-accent: #f5f6fb; /* hover and keyboard-active surfaces */
+  --color-accent-foreground: #181818; /* label on an accented control */
+  --color-selected: #e6f1fd; /* surface of a control that is switched on */
+  --color-border: #e2e2e2; /* dividers, outlines that read against white */
+  --color-border-subtle: #f5f6fb; /* hairlines framing the chrome */
+  --color-ring: #1c85f5; /* focus ring */
   --color-active: #fbfcff;
-  --color-muted: #fafbfb;
-  --color-muted-foreground: #778397;
   --color-destructive: #c61d1d;
   --color-secondary: #778397;
   --color-brand: #3788ee;

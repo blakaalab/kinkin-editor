@@ -168,11 +168,19 @@ Ghi đè các design token trên class phạm vi — chúng sẽ lan xuống m�
 
 ```css
 .kinkin-editor {
-  --color-primary-700: #7c3aed;  /* màu nhấn: nút đang bật, vòng focus */
-  --color-foreground: #1f2937;   /* chữ nội dung */
-  --color-background: #ffffff;
-  --color-border: #e5e7eb;
-  --color-muted-foreground: #6b7280;
+  --color-background: #ffffff;        /* nền: thanh công cụ, menu, hộp thoại */
+  --color-foreground: #1f2937;        /* chữ nội dung */
+  --color-control: #4b5563;           /* nhãn và biểu tượng trên thanh công cụ, menu */
+  --color-muted-foreground: #6b7280;  /* chữ phụ */
+  --color-placeholder: #9ca3af;       /* chữ gợi ý, biểu tượng mờ */
+  --color-accent: #f3f4f6;            /* nền khi rê chuột */
+  --color-accent-foreground: #111827; /* nhãn của nút đang bật */
+  --color-selected: #ede9fe;          /* nền của nút đang bật */
+  --color-border: #e5e7eb;            /* đường phân cách, viền ô màu */
+  --color-border-subtle: #f3f4f6;     /* đường viền mảnh quanh giao diện */
+  --color-ring: #7c3aed;              /* vòng focus */
+  --color-primary-700: #7c3aed;       /* dải màu nhấn: AI, tải ảnh, liên kết */
+  --color-brand: #7c3aed;             /* mục đang xem trong mục lục */
   --font-sans: "Inter", system-ui, sans-serif;
 }
 ```

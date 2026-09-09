@@ -22,7 +22,7 @@ export const TiptapComboboxList = forwardRef<
     ref={ref}
     className={cn(
       "h-full rounded-xl border p-1.5 outline-none",
-      "border-gray-200 bg-white text-gray-600",
+      "border-border-subtle bg-background text-control",
       "shadow-xl",
       "max-w-64 overflow-y-auto",
       "empty:hidden",

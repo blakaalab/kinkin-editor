@@ -36,14 +36,14 @@ export const ToCItem = ({
     >
       <a
         className={cn(
-          "block py-2.5 text-sm leading-snug transition-colors no-underline font-semibold hover:bg-blue-100 hover:text-brand",
+          "block py-2.5 text-sm leading-snug transition-colors no-underline font-semibold hover:bg-primary-100 hover:text-brand",
           item.level === 1 && "pl-2.5",
           item.level === 2 && "pl-4.5",
           item.level === 3 && "pl-6.5",
           item.level === 4 && "pl-8.5",
           item.level === 5 && "pl-10.5",
           item.level === 6 && "pl-12.5",
-          isActive ? "text-primary border-l-2 border-brand" : "text-secondary",
+          isActive ? "text-brand border-l-2 border-brand" : "text-secondary",
         )}
         href={`#${item.id}`}
         onClick={(e) => onItemClick(e, item.id)}

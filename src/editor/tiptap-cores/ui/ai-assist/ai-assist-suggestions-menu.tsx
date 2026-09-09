@@ -30,9 +30,9 @@ function SubmenuItem({ suggestion, onSelect }: SubmenuItemProps) {
             <TiptapMenuButton
               render={
                 <TiptapButton className="w-full">
-                  <Icon className="size-4 text-blue-700" />
+                  <Icon className="size-4 text-primary-700" />
                   <span className="flex-1 text-left">{suggestion.label}</span>
-                  <ChevronRight className="size-4 text-gray-400" />
+                  <ChevronRight className="size-4 text-placeholder" />
                 </TiptapButton>
               }
             />
@@ -98,7 +98,7 @@ export function AiAssistSuggestionsMenu({
         key={suggestion.id}
         render={
           <TiptapButton className="w-full">
-            <Icon className="size-4 text-blue-700" />
+            <Icon className="size-4 text-primary-700" />
             <span>{suggestion.label}</span>
           </TiptapButton>
         }
@@ -111,7 +111,7 @@ export function AiAssistSuggestionsMenu({
     <TiptapComboboxList>
       {suggestionsCategory.length > 0 && (
         <TiptapMenuGroup>
-          <span className="px-2 py-1 text-xs font-semibold text-gray-400">
+          <span className="px-2 py-1 text-xs font-semibold text-placeholder">
             Suggestions
           </span>
           {suggestionsCategory.map(renderSuggestion)}
@@ -122,7 +122,7 @@ export function AiAssistSuggestionsMenu({
       )}
       {editCategory.length > 0 && (
         <TiptapMenuGroup>
-          <span className="px-2 py-1 text-xs font-semibold text-gray-400">
+          <span className="px-2 py-1 text-xs font-semibold text-placeholder">
             Edit
           </span>
           {editCategory.map(renderSuggestion)}

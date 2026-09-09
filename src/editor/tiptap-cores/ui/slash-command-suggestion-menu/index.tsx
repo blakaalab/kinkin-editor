@@ -129,7 +129,7 @@ export const SlashCommandSuggestionMenu = (
       char="/"
       maxHeight={205}
       pluginKey="slashCommandSuggestionMenu"
-      decorationClass="bg-gray-200 px-1 py-0.5 rounded-sm after:text-gray-500 tiptap-core-slash-decoration"
+      decorationClass="bg-accent px-1 py-0.5 rounded-sm after:text-muted-foreground tiptap-core-slash-decoration"
       decorationContent="Type to search"
       selector="tiptap-slash-command-suggestion-menu"
       items={({ query, editor }) =>

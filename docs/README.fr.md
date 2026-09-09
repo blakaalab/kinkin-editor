@@ -175,11 +175,19 @@ ce qui se trouve à l'intérieur :
 
 ```css
 .kinkin-editor {
-  --color-primary-700: #7c3aed;  /* accent : boutons actifs, anneaux de focus */
-  --color-foreground: #1f2937;   /* texte courant */
-  --color-background: #ffffff;
-  --color-border: #e5e7eb;
-  --color-muted-foreground: #6b7280;
+  --color-background: #ffffff;        /* surfaces : barre d'outils, menus, dialogues */
+  --color-foreground: #1f2937;        /* texte courant */
+  --color-control: #4b5563;           /* libellés et icônes de la barre et des menus */
+  --color-muted-foreground: #6b7280;  /* texte secondaire */
+  --color-placeholder: #9ca3af;       /* textes indicatifs, icônes discrètes */
+  --color-accent: #f3f4f6;            /* surfaces au survol */
+  --color-accent-foreground: #111827; /* libellé d'un bouton actif */
+  --color-selected: #ede9fe;          /* surface d'un bouton actif */
+  --color-border: #e5e7eb;            /* séparateurs, contour des pastilles de couleur */
+  --color-border-subtle: #f3f4f6;     /* filets encadrant l'interface */
+  --color-ring: #7c3aed;              /* anneau de focus */
+  --color-primary-700: #7c3aed;       /* gamme d'accent : IA, envoi, liens */
+  --color-brand: #7c3aed;             /* élément actif du sommaire */
   --font-sans: "Inter", system-ui, sans-serif;
 }
 ```

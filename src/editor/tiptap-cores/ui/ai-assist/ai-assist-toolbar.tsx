@@ -58,7 +58,7 @@ export function AiAssistToolbar({
       <div
         className={cn(
           "w-80 rounded-lg border overflow-hidden z-100 relative",
-          "border-gray-200 bg-white",
+          "border-border-subtle bg-background",
           "shadow-xl",
           "flex items-center gap-0.5 p-1",
         )}
@@ -66,12 +66,12 @@ export function AiAssistToolbar({
         {isLoading ? (
           <>
             <div className="shrink-0 pl-1.5 pr-1">
-              <Loader2 className="size-4 text-blue-500 animate-spin" />
+              <Loader2 className="size-4 text-primary-500 animate-spin" />
             </div>
-            <span className="flex-1 text-sm text-gray-600">{loadingText}</span>
+            <span className="flex-1 text-sm text-control">{loadingText}</span>
             <TiptapButton
               onClick={onStop}
-              className="shrink-0 rounded-md text-gray-600 hover:text-gray-800"
+              className="shrink-0 rounded-md text-control hover:text-gray-800"
             >
               <CircleStop className="size-4" />
             </TiptapButton>
@@ -79,7 +79,7 @@ export function AiAssistToolbar({
         ) : (
           <>
             <div className="shrink-0 pl-1.5 pr-1">
-              <Sparkles className="size-4 text-blue-500" />
+              <Sparkles className="size-4 text-primary-500" />
             </div>
             <TiptapCombobox
               value={inputValue}
@@ -96,7 +96,7 @@ export function AiAssistToolbar({
                   className={cn(
                     "flex-1 h-8 text-sm font-normal leading-normal",
                     "bg-transparent appearance-none outline-none",
-                    "placeholder:text-gray-400",
+                    "placeholder:text-placeholder",
                   )}
                 />
               }
@@ -107,15 +107,15 @@ export function AiAssistToolbar({
               className={cn(
                 "shrink-0 rounded-md",
                 canSubmit
-                  ? "bg-blue-500 text-white hover:bg-blue-600"
-                  : "bg-gray-100 text-gray-400",
+                  ? "bg-primary-500 text-background hover:bg-primary-600"
+                  : "bg-muted text-placeholder",
               )}
             >
               <ArrowUp className="size-4" />
             </TiptapButton>
             <TiptapButton
               onClick={onClose}
-              className="shrink-0 text-gray-400 hover:text-gray-600"
+              className="shrink-0 text-placeholder hover:text-control"
             >
               <X className="size-4" />
             </TiptapButton>

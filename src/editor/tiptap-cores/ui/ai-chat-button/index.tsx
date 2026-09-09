@@ -99,7 +99,7 @@ export const AiChatButton = forwardRef<HTMLButtonElement, AiChatButtonProps>(
       return (
         <div
           className={cn(
-            "flex flex-row items-center gap-1 bg-white rounded-lg",
+            "flex flex-row items-center gap-1 bg-background rounded-lg",
             className,
           )}
         >
@@ -114,7 +114,7 @@ export const AiChatButton = forwardRef<HTMLButtonElement, AiChatButtonProps>(
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="off"
-              className="block w-full h-full text-sm font-normal leading-normal px-2 rounded-md bg-transparent appearance-none outline-none placeholder:text-gray-400"
+              className="block w-full h-full text-sm font-normal leading-normal px-2 rounded-md bg-transparent appearance-none outline-none placeholder:text-placeholder"
             />
           </div>
 
@@ -138,7 +138,7 @@ export const AiChatButton = forwardRef<HTMLButtonElement, AiChatButtonProps>(
         aria-label="Chat with AI"
         tooltip="Chat with AI"
         onClick={handleButtonClick}
-        className={cn("text-blue-500", className)}
+        className={cn("text-primary-500", className)}
         showTooltip={showTooltip}
         {...buttonProps}
         ref={ref}
