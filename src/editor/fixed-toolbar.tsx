@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
+import { useContainerWidth } from "@/editor/tiptap-cores/hooks/use-container-width";
 import { useTiptapEditor } from "@/editor/tiptap-cores/hooks/use-tiptap-editor";
 import { AiAssistButton } from "@/editor/tiptap-cores/ui/ai-assist/ai-assist-button";
 import { TiptapButton } from "@/editor/tiptap-cores/ui/base/tiptap-button";
@@ -36,8 +37,9 @@ import { MarkButton } from "@/editor/tiptap-cores/ui/mark-button";
 import { useParagraph } from "@/editor/tiptap-cores/ui/paragraph-button/use-paragraph";
 import { SlashCommandTriggerButton } from "@/editor/tiptap-cores/ui/slash-command-suggestion-menu/slash-command-trigger-button";
 import { TextAlignMenu } from "@/editor/tiptap-cores/ui/text-align-button";
+import { cn } from "@/lib/utils";
 
-const BlockTypeMenu = () => {
+const BlockTypeMenu = ({ compact }: { compact: boolean }) => {
   const { editor } = useTiptapEditor();
   const paragraph = useParagraph({ hideWhenUnavailable: true });
   const h1 = useHeading({ level: 1, hideWhenUnavailable: true });
@@ -77,7 +79,7 @@ const BlockTypeMenu = () => {
               )}
             >
               <ActiveIcon className="size-4" />
-              <span className="text-xs">{activeItem.label}</span>
+              {!compact && <span className="text-xs">{activeItem.label}</span>}
               <ChevronDown className="size-3" />
             </TiptapButton>
           }
@@ -285,6 +287,15 @@ const InsertButtons = () => {
   );
 };
 
+/**
+ * The width — of the toolbar itself, not the viewport, since the editor is
+ * often embedded in a pane much narrower than the screen — below which the
+ * toolbar goes compact: labels become icons and the group dividers go, which
+ * together buy back about 200px. Narrower still, groups wrap onto further rows
+ * rather than anything being clipped or scrolled out of reach.
+ */
+const COMPACT_BREAKPOINT = 960;
+
 interface FixedToolbarProps {
   /** Show the AI Assist button. Requires `streamCompletion` on the editor. */
   showAiAssist?: boolean;
@@ -295,41 +306,63 @@ interface FixedToolbarProps {
  * A persistent, always-visible toolbar covering the editor's full formatting
  * surface. Render it via the `toolbar` slot on `RichTextEditor` so it sits
  * inside the editor context.
+ *
+ * It is responsive to its own width: labels collapse to icons as space runs
+ * out, and groups wrap onto further rows instead of overflowing, so every
+ * control stays reachable at any width.
  */
 export const FixedToolbar = ({
   showAiAssist = false,
   className,
 }: FixedToolbarProps) => {
   const { editor } = useTiptapEditor();
+  const { ref: toolbarRef, width } = useContainerWidth<HTMLDivElement>();
+
+  // Width 0 means "not measured yet" — assume roomy so a wide toolbar never
+  // flashes its compact layout.
+  const isCompact = width > 0 && width < COMPACT_BREAKPOINT;
 
   if (!editor?.isEditable) {
     return null;
   }
 
+  // Dividers are dropped rather than kept because a wrapped row leaves them
+  // dangling at its end; the wider gap between groups reads the same.
+  const separator = isCompact ? null : <TiptapToolbarSeparator />;
+
   return (
     <TiptapToolbar
+      ref={toolbarRef}
       variant="floating"
-      className={className}
+      className={cn(
+        // Wrapping keeps every button clickable in a narrow container: whole
+        // groups drop to the next row, and a group only breaks up when the
+        // toolbar is narrower than that group alone. The wider gap stands in
+        // for the separators once they are dropped.
+        "flex-wrap gap-y-1 p-1 [&>[data-toolbar-group]]:flex-wrap",
+        isCompact && "gap-x-2",
+        className,
+      )}
       style={{ borderRadius: 0, borderWidth: 0, boxShadow: "none" }}
     >
       <TiptapToolbarGroup>
         <HistoryButtons />
       </TiptapToolbarGroup>
 
-      <TiptapToolbarSeparator />
+      {separator}
 
       <TiptapToolbarGroup>
-        <BlockTypeMenu />
+        <BlockTypeMenu compact={isCompact} />
         <ListMenu />
       </TiptapToolbarGroup>
 
-      <TiptapToolbarSeparator />
+      {separator}
 
       <TiptapToolbarGroup>
         <TextAlignMenu />
       </TiptapToolbarGroup>
 
-      <TiptapToolbarSeparator />
+      {separator}
 
       <TiptapToolbarGroup>
         <MarkButton type="bold" />
@@ -341,7 +374,7 @@ export const FixedToolbar = ({
         <ColorMenu type="highlight" />
       </TiptapToolbarGroup>
 
-      <TiptapToolbarSeparator />
+      {separator}
 
       <TiptapToolbarGroup>
         <BlockquoteButton />
@@ -350,17 +383,24 @@ export const FixedToolbar = ({
         <LinkMenu />
       </TiptapToolbarGroup>
 
-      <TiptapToolbarSeparator />
+      {separator}
 
       <TiptapToolbarGroup>
         <InsertButtons />
       </TiptapToolbarGroup>
 
-      <TiptapToolbarSeparator />
+      {separator}
 
       <TiptapToolbarGroup>
         <SlashCommandTriggerButton />
-        {showAiAssist && <AiAssistButton />}
+        {showAiAssist && (
+          <AiAssistButton
+            // The label is the first thing to go: it is the widest item here
+            // and the sparkle icon plus tooltip carries the same meaning.
+            text={isCompact ? "" : undefined}
+            showTooltip={isCompact}
+          />
+        )}
       </TiptapToolbarGroup>
     </TiptapToolbar>
   );
