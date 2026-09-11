@@ -51,8 +51,15 @@ import {
   clearEditorHistory,
   sanitizeNode,
 } from "@/editor/tiptap-cores/lib/tiptap-utils";
+import { EditorImage } from "@/editor/tiptap-cores/nodes/image-node/image-node-extension";
 import { ImageUpload } from "@/editor/tiptap-cores/nodes/image-node/image-upload-node-extension";
 import { CustomTable } from "@/editor/tiptap-cores/nodes/table-node/table-node-extension";
+import { VideoEmbed } from "@/editor/tiptap-cores/nodes/video-embed-node/video-embed-node-extension";
+import { EditorVideo } from "@/editor/tiptap-cores/nodes/video-node/video-node-extension";
+import {
+  type EditorVideoUploadHandler,
+  VideoUpload,
+} from "@/editor/tiptap-cores/nodes/video-node/video-upload-node-extension";
 import { AiAssistPanel } from "@/editor/tiptap-cores/ui/ai-assist";
 import { EmojiSuggestionMenu } from "@/editor/tiptap-cores/ui/emoji-suggestion-menu";
 import { NodeHandle } from "@/editor/tiptap-cores/ui/node-handle";
@@ -87,8 +94,16 @@ const withEditorBehaviour = (
       });
     case "table":
       return CustomTable;
+    case "image":
+      return EditorImage;
     case "imageUpload":
       return ImageUpload;
+    case "video":
+      return EditorVideo;
+    case "videoEmbed":
+      return VideoEmbed;
+    case "videoUpload":
+      return VideoUpload;
     case "tableOfContents":
       return TableOfContents.configure({
         onUpdate: (items) => onTocItemsChange?.(items),
@@ -146,6 +161,7 @@ interface EditorContentAreaProps {
   onAiChatRequest?: (message: string, selectedText: string) => void;
   aiMode?: "assist" | "chat";
   imageUploadHandler?: EditorImageUploadHandler;
+  videoUploadHandler?: EditorVideoUploadHandler;
 }
 
 function EditorContentArea({
@@ -154,11 +170,17 @@ function EditorContentArea({
   onAiChatRequest,
   aiMode,
   imageUploadHandler,
+  videoUploadHandler,
 }: EditorContentAreaProps) {
   const { editor } = useContext(EditorContext)!;
   const { isDragging } = useUiEditorState(editor);
 
   useEditorImageUpload(editor, { handler: imageUploadHandler });
+  useEffect(() => {
+    if (editor) {
+      editor.storage.videoUpload.handler = videoUploadHandler ?? null;
+    }
+  }, [editor, videoUploadHandler]);
   useScrollToHash();
   useCursorVisibility({ editor });
 
@@ -202,6 +224,11 @@ export interface RichTextEditorProps {
   pageTitle?: string;
   /** Uploads images dropped/pasted into the editor. Omit to disable image upload. */
   imageUploadHandler?: EditorImageUploadHandler;
+  /**
+   * Uploads video files dropped, pasted or picked from the `/video` field.
+   * Omit to disable video upload; YouTube and TikTok embeds work regardless.
+   */
+  videoUploadHandler?: EditorVideoUploadHandler;
   /** Streams AI Assist completions. Omit to disable AI Assist (buttons become a no-op). */
   streamCompletion?: StreamCompletionFn;
   /**
@@ -223,6 +250,7 @@ export const RichTextEditor = ({
   editable = true,
   pageTitle,
   imageUploadHandler,
+  videoUploadHandler,
   streamCompletion,
   toolbar,
 }: RichTextEditorProps) => {
@@ -354,6 +382,7 @@ export const RichTextEditor = ({
       onAiChatRequest={onAiChatRequest}
       aiMode={aiMode}
       imageUploadHandler={imageUploadHandler}
+      videoUploadHandler={videoUploadHandler}
     />
   );
 

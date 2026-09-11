@@ -3,7 +3,14 @@ import type { Node as PmNode, Slice } from "@tiptap/pm/model";
 import { Plugin, PluginKey } from "@tiptap/pm/state";
 
 const ALLOWED_TABLE_NODE_TYPES = new Set(["paragraph", "text"]);
-const BLOCKED_IN_BLOCKQUOTE = new Set(["table", "image", "imageUpload"]);
+const BLOCKED_IN_BLOCKQUOTE = new Set([
+  "table",
+  "image",
+  "imageUpload",
+  "videoEmbed",
+  "video",
+  "videoUpload",
+]);
 
 const findRestrictedAncestor = (
   doc: PmNode,

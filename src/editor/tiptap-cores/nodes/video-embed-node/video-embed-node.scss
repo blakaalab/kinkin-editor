@@ -1,0 +1,48 @@
+@mixin content {
+  // Same rhythm as images: its own margin, collapsing with a neighbour's, and
+  // centred once resized narrower than the column.
+  [data-type="videoEmbed"] {
+    margin: 1.125em auto;
+
+    &:first-child {
+      margin-top: 0;
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    // An embed that never got its link renders as an empty element.
+    &:empty {
+      display: none;
+    }
+
+    iframe {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border: 0;
+      border-radius: 0.375rem;
+    }
+  }
+
+  // Shorts and TikToks. At full width a 9:16 frame would be taller than most
+  // screens, so until resized it keeps the width TikTok's own embed uses. The
+  // width sits on the wrapper, where a resize's inline `width` replaces it.
+  [data-type="videoEmbed"][data-orientation="portrait"] {
+    width: min(100%, 20.3125rem);
+
+    iframe {
+      aspect-ratio: 9 / 16;
+    }
+  }
+}
+
+@mixin editor {
+  // Spacing and selection come from the shared resizable-media rules.
+
+  // Read-only, with no link: nothing to show, and no margin to leave behind.
+  .node-videoEmbed:has(> [data-type="videoEmbed"]:empty) {
+    display: none;
+  }
+}

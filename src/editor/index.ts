@@ -3,5 +3,6 @@
 
 export { RichTextEditor } from "@/editor/rich-text-editor";
 export type { EditorImageUploadHandler } from "@/editor/tiptap-cores/hooks/use-editor-image-upload";
+export type { EditorVideoUploadHandler } from "@/editor/tiptap-cores/nodes/video-node/video-upload-node-extension";
 export { ToC } from "@/editor/toc";
 export type { StreamCompletionParams } from "@/editor/use-ai-assist-stream";

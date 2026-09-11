@@ -13,6 +13,7 @@ import { CopyButton } from "../code-block";
 import {
   demoImageUploadHandler,
   demoStreamCompletion,
+  demoVideoUploadHandler,
   PLAYGROUND_CONTENT,
 } from "../demo";
 
@@ -203,6 +204,7 @@ export function PlaygroundPage() {
             pageTitle="Kinkin Editor playground"
             placeholder="Type / for commands…"
             imageUploadHandler={demoImageUploadHandler}
+            videoUploadHandler={demoVideoUploadHandler}
             streamCompletion={demoStreamCompletion}
             toolbar={<FixedToolbar showAiAssist />}
           />

@@ -28,8 +28,14 @@ export {
 } from "./editor/content-extensions";
 export { CONTENT_SCOPE_CLASS } from "./editor/content-scope";
 export { HorizontalRule } from "./editor/tiptap-cores/nodes/horizontal-rule-node/horizontal-rule-node-extension";
+export { ContentImage } from "./editor/tiptap-cores/nodes/image-node/image-node-schema";
 export { ImageUploadNode } from "./editor/tiptap-cores/nodes/image-node/image-upload-node-schema";
 export {
   CELL_MIN_WIDTH,
   ContentTable,
 } from "./editor/tiptap-cores/nodes/table-node/table-node-schema";
+export { VideoEmbedNode } from "./editor/tiptap-cores/nodes/video-embed-node/video-embed-node-schema";
+export {
+  VideoNode,
+  VideoUploadNode,
+} from "./editor/tiptap-cores/nodes/video-node/video-node-schema";

@@ -59,7 +59,7 @@ upload and AI are plain callbacks you supply, or leave out.
 ## Features
 
 **Slash menu** (type `/`): Paragraph, Heading 1–4, Bullet list, Numbered list,
-Task list, Quote, Code, Emoji, Table, Image, Columns (2–4), Horizontal line.
+Task list, Quote, Code, Emoji, Table, Image, Video, Columns (2–4), Horizontal line.
 
 **Also built in**
 
@@ -72,6 +72,16 @@ Task list, Quote, Code, Emoji, Table, Image, Columns (2–4), Horizontal line.
 - Text alignment, text colour and highlight colour, from the toolbar or the
   selection toolbar
 - Image upload through a callback you supply
+- YouTube and TikTok embeds — from the slash menu, or paste a video link on an
+  empty line. Shorts and TikToks embed upright at 9:16. Saved as the link, in
+  markdown as `:::videoEmbed {src="…"} :::`; the iframe is rebuilt from the
+  video id on every render, so a document can't carry any other iframe
+- Video upload through a callback you supply — drop or paste a video file, or
+  use "Upload file" in the `/video` field. It plays in the browser's own player
+- Resizable images and videos — drag the handle on either side; the media
+  stays centred. The width is a percentage of the column, so it holds on a
+  narrower page, and markdown keeps it: `![alt](src){width=50%}` for images,
+  `width="50%"` inside a video's `{…}`
 - Streaming AI Assist — improve, continue, summarize, fix grammar, simplify,
   shorten, extend, translate, change tone, or a custom prompt
 - Table of contents via `onTocItemsChange`
@@ -335,7 +345,8 @@ declaration on the content element would silently beat one on `html.dark`.)
 
 Two display-only decisions: task-list checkboxes are rendered but not
 clickable — a page has nowhere to save the click — and the `imageUpload`
-placeholder is hidden.
+placeholder is hidden, as are a video embed that never got its link and a
+video upload that never finished.
 
 One constraint: the scope element is `white-space: pre-wrap`, matching the
 editor, so runs of spaces the author typed survive. Don't pretty-print or
@@ -356,6 +367,7 @@ indent the generated HTML inside it — that indentation would render.
 | `editable` | `boolean` | `true` | `false` renders read-only — toolbars hide, content stays selectable. |
 | `toolbar` | `ReactNode` | — | Rendered above the content, inside the editor context. Pass `<FixedToolbar />`. |
 | `imageUploadHandler` | `EditorImageUploadHandler` | — | Enables image upload. Omit to disable. |
+| `videoUploadHandler` | `EditorVideoUploadHandler` | — | Enables video file upload. Omit to disable; YouTube and TikTok embeds work either way. |
 | `streamCompletion` | `StreamCompletionFn` | — | Enables AI Assist. Omit to disable. |
 | `aiMode` | `"assist" \| "chat"` | — | Which AI button the selection toolbar shows. |
 | `onAiChatRequest` | `(message, selectedText) => void` | — | Called by the chat button when `aiMode="chat"`. |
@@ -415,6 +427,48 @@ const imageUploadHandler: EditorImageUploadHandler = {
 };
 ```
 
+### `videoUploadHandler` — video uploads
+
+Called for video files dropped, pasted, or picked with "Upload file" in the
+`/video` field. Same contract as images: return the URL to play the video from,
+or throw to mark the upload failed. Two optional limits are checked before
+`upload` is called — a file outside them gets a block saying why, rather than
+disappearing:
+
+```ts
+import type { EditorVideoUploadHandler } from "@blakaa/kinkin-editor";
+
+const videoUploadHandler: EditorVideoUploadHandler = {
+  upload: async (file, onProgress) => {
+    // Large files: prefer a signed URL and upload straight to storage, so the
+    // video never passes through your server.
+    const { uploadUrl, publicUrl } = await fetch("/api/video-upload-url", {
+      method: "POST",
+      body: JSON.stringify({ name: file.name, type: file.type }),
+    }).then((res) => res.json());
+
+    const res = await fetch(uploadUrl, { method: "PUT", body: file });
+    if (!res.ok) throw new Error("Upload failed");
+
+    onProgress(100);
+    return publicUrl;
+  },
+  maxSize: 200 * 1024 * 1024, // default 100 MB
+  accept: ["video/mp4", "video/webm"], // default MP4, WebM and Ogg
+};
+```
+
+`fetch` reports no upload progress; for a live progress bar, upload with
+`XMLHttpRequest` and call `onProgress` from `xhr.upload.onprogress`.
+
+QuickTime (`.mov`) is off by default: it uploads fine and then plays as a black
+box in any browser without the codec inside it. Add `"video/quicktime"` to
+`accept` if you transcode on upload.
+
+The returned URL may be absolute, a path on your own site, or a `blob:` URL.
+`javascript:` and other schemes are refused. In markdown a video is
+`:::video {src="…"} :::`.
+
 ### `streamCompletion` — streaming AI Assist
 
 Powers AI Assist. The library builds the prompt from the user's chosen action
@@ -468,7 +522,7 @@ Omit it and the AI buttons become no-ops, with a console warning.
 | `createContentExtensions()` | The schema-only extension list, for rendering saved documents. Also at `@blakaa/kinkin-editor/content`. |
 | `CONTENT_SCOPE_CLASS` | `"kinkin-content"` — the class `content.css` scopes to. |
 | `<ToCItem />`, `<ToCEmptyState />` | The pieces `<ToC />` is built from, if you want your own outline layout. |
-| Types | `RichTextEditorProps`, `EditorImageUploadHandler`, `StreamCompletionFn`, `StreamCompletionParams` |
+| Types | `RichTextEditorProps`, `EditorImageUploadHandler`, `EditorVideoUploadHandler`, `StreamCompletionFn`, `StreamCompletionParams` |
 
 ---
 

@@ -1,5 +1,6 @@
 import type {
   EditorImageUploadHandler,
+  EditorVideoUploadHandler,
   StreamCompletionParams,
 } from "@/editor";
 
@@ -24,6 +25,27 @@ export const demoImageUploadHandler: EditorImageUploadHandler = {
       reader.onload = () => resolve(reader.result as string);
       reader.onerror = () => reject(reader.error ?? new Error("Read failed"));
       reader.readAsDataURL(file);
+    }),
+};
+
+/**
+ * Plays the file from memory instead of uploading it, with a fake progress
+ * bar. The blob URL dies with the tab, so a saved document loses the video.
+ * Never ship this.
+ */
+export const demoVideoUploadHandler: EditorVideoUploadHandler = {
+  upload: (file, onProgress) =>
+    new Promise((resolve) => {
+      let progress = 0;
+      const timer = setInterval(() => {
+        progress += 20;
+        onProgress(progress);
+
+        if (progress >= 100) {
+          clearInterval(timer);
+          resolve(URL.createObjectURL(file));
+        }
+      }, 150);
     }),
 };
 
@@ -60,7 +82,7 @@ type.
 
 ## Try these
 
-- Type \`/\` for the slash menu — paragraph, headings, lists, quote, code, emoji, table, image, horizontal line
+- Type \`/\` for the slash menu — paragraph, headings, lists, quote, code, emoji, table, image, video, horizontal line
 - Select text to raise the floating toolbar, or use the toolbar above
 - Type \`:\` to open the emoji picker
 - Drag the handle to the left of any block to reorder it; \`Mod-Shift-↑/↓\` moves it, \`Mod-Shift-D\` duplicates it

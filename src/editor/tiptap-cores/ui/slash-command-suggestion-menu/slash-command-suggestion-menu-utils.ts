@@ -19,6 +19,7 @@ import {
   Smile,
   Table2,
   TextQuote,
+  Video,
 } from "lucide-react";
 
 import { isNodeInSchema } from "../../lib/tiptap-utils";
@@ -238,6 +239,11 @@ const menuItemTexts = {
     aliases: ["image", "img", "photo", "picture", "upload"],
     badge: ImageIcon,
   },
+  video: {
+    title: "Video",
+    aliases: ["video", "youtube", "tiktok", "embed", "movie", "clip", "mp4"],
+    badge: Video,
+  },
   columns_2: {
     title: "2 columns",
     aliases: ["columns", "column", "cols", "layout", "2col", "split"],
@@ -267,7 +273,7 @@ const menuItemSections: SlashMenuItemType[][] = [
   ["text", "heading_1", "heading_2", "heading_3", "heading_4"],
   ["bullet_list", "ordered_list", "task_list"],
   ["code_block", "quote"],
-  ["table", "image"],
+  ["table", "image", "video"],
   ["columns_2", "columns_3", "columns_4"],
   ["emoji", "divider"],
 ];
@@ -393,6 +399,12 @@ const getMenuItemImplementations = () => ({
     check: (editor: Editor) => isNodeInSchema("imageUpload", editor),
     action: ({ editor }: { editor: Editor }) => {
       editor.chain().focus().insertImagePlaceholder().run();
+    },
+  },
+  video: {
+    check: (editor: Editor) => isNodeInSchema("videoEmbed", editor),
+    action: ({ editor }: { editor: Editor }) => {
+      editor.chain().focus().insertVideoEmbedPlaceholder().run();
     },
   },
 });

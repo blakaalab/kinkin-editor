@@ -1,7 +1,7 @@
-import type { Transaction } from "@tiptap/pm/state";
 import { Plugin, PluginKey, TextSelection } from "@tiptap/pm/state";
 import { ReactNodeViewRenderer } from "@tiptap/react";
 
+import { setCursorAfterNode } from "../../lib/tiptap-utils";
 import { ImageUploadNode } from "./image-upload-node-schema";
 import { ImageUploadNodeView } from "./image-upload-node-view";
 
@@ -34,19 +34,6 @@ const isImageFile = (file: File): boolean =>
 
 const getImageFiles = (files: FileList | File[]): File[] =>
   Array.from(files).filter(isImageFile);
-
-const setCursorAfterNode = (tr: Transaction, posAfterNode: number) => {
-  const nodeAfter = tr.doc.nodeAt(posAfterNode);
-  if (nodeAfter?.isTextblock) {
-    tr.setSelection(TextSelection.create(tr.doc, posAfterNode + 1));
-  } else {
-    const defaultType = tr.doc.type.contentMatch.defaultType;
-    if (defaultType) {
-      tr.insert(posAfterNode, defaultType.create());
-      tr.setSelection(TextSelection.create(tr.doc, posAfterNode + 1));
-    }
-  }
-};
 
 /** The shared placeholder schema, with the upload UI and drop handling. */
 export const ImageUpload = ImageUploadNode.extend({

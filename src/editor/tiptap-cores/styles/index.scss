@@ -7,6 +7,7 @@
 //
 @use "variables.scss";
 @use "tokens" as t;
+@use "resizable-media";
 
 @use "../nodes/blockquote-node/blockquote-node" as blockquote;
 @use "../nodes/code-block-node/code-block-node" as code-block;
@@ -17,6 +18,8 @@
 @use "../nodes/image-node/image-node" as image;
 @use "../nodes/paragraph-node/paragraph-node" as paragraph;
 @use "../nodes/table-node/table-node" as table;
+@use "../nodes/video-embed-node/video-embed-node" as video-embed;
+@use "../nodes/video-node/video-node" as video;
 
 .tiptap-core.ProseMirror {
   @include blockquote.content;
@@ -28,11 +31,16 @@
   @include image.content;
   @include paragraph.content;
   @include table.content;
+  @include video-embed.content;
+  @include video.content;
 
   @include column.editor;
   @include image.editor;
   @include paragraph.editor;
   @include table.editor;
+  @include video-embed.editor;
+  @include video.editor;
+  @include resizable-media.editor;
 }
 
 @include paragraph.editor-global;

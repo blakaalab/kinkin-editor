@@ -1,6 +1,12 @@
 import type { Schema, Node as TiptapNode } from "@tiptap/pm/model";
 import { Fragment } from "@tiptap/pm/model";
-import { EditorState, NodeSelection, type Selection } from "@tiptap/pm/state";
+import {
+  EditorState,
+  NodeSelection,
+  type Selection,
+  TextSelection,
+  type Transaction,
+} from "@tiptap/pm/state";
 import type { Editor } from "@tiptap/react";
 import { isNodeSelection, isTextSelection, posToDOMRect } from "@tiptap/react";
 
@@ -449,6 +455,75 @@ export const sanitizeNode = (node: TiptapNode, schema: Schema): TiptapNode => {
   return (
     filled ?? node.type.createAndFill(node.attrs, null, node.marks) ?? node
   );
+};
+
+/**
+ * Puts the caret in the textblock at `posAfterNode`, adding an empty one first
+ * when what follows is not a textblock — so inserting a block never strands
+ * the caret with nowhere to type.
+ */
+export const setCursorAfterNode = (tr: Transaction, posAfterNode: number) => {
+  const nodeAfter = tr.doc.nodeAt(posAfterNode);
+  if (nodeAfter?.isTextblock) {
+    tr.setSelection(TextSelection.create(tr.doc, posAfterNode + 1));
+  } else {
+    const defaultType = tr.doc.type.contentMatch.defaultType;
+    if (defaultType) {
+      tr.insert(posAfterNode, defaultType.create());
+      tr.setSelection(TextSelection.create(tr.doc, posAfterNode + 1));
+    }
+  }
+};
+
+/**
+ * Puts `node` in place of the empty textblock the caret is in, or after the
+ * block it is in, and returns where it went. `null` when the surrounding node
+ * cannot hold a block there — a table cell, which takes paragraphs only.
+ */
+export const placeBlock = (
+  tr: Transaction,
+  node: TiptapNode,
+): number | null => {
+  const { selection } = tr;
+
+  if (selection instanceof NodeSelection) {
+    const $pos = tr.doc.resolve(selection.to);
+
+    if (!$pos.parent.canReplaceWith($pos.index(), $pos.index(), node.type)) {
+      return null;
+    }
+
+    tr.insert(selection.to, node);
+    return selection.to;
+  }
+
+  const { $from } = selection;
+  const block = $from.parent;
+
+  if (!block.isTextblock || $from.depth < 1) {
+    return null;
+  }
+
+  const container = $from.node(-1);
+  const index = $from.index(-1);
+
+  if (block.content.size === 0) {
+    if (!container.canReplaceWith(index, index + 1, node.type)) {
+      return null;
+    }
+
+    const pos = $from.before();
+    tr.replaceWith(pos, pos + block.nodeSize, node);
+    return pos;
+  }
+
+  if (!container.canReplaceWith(index + 1, index + 1, node.type)) {
+    return null;
+  }
+
+  const pos = $from.after();
+  tr.insert(pos, node);
+  return pos;
 };
 
 export const clearEditorHistory = (editor: Editor | null) => {

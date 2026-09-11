@@ -25,6 +25,7 @@ import { CodeBlock, CommandLine } from "../code-block";
 import {
   demoImageUploadHandler,
   demoStreamCompletion,
+  demoVideoUploadHandler,
   HERO_CONTENT,
 } from "../demo";
 import { PACKAGE_NAME, REPO_URL } from "../layout";
@@ -344,6 +345,7 @@ export function HomePage() {
                     aiMode="assist"
                     placeholder="Type / for commands…"
                     imageUploadHandler={demoImageUploadHandler}
+                    videoUploadHandler={demoVideoUploadHandler}
                     streamCompletion={demoStreamCompletion}
                     toolbar={<FixedToolbar showAiAssist />}
                   />

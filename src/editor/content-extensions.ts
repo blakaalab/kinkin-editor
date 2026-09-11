@@ -1,7 +1,6 @@
 import type { Extensions } from "@tiptap/core";
 import { Emoji, gitHubEmojis } from "@tiptap/extension-emoji";
 import { Highlight } from "@tiptap/extension-highlight";
-import Image from "@tiptap/extension-image";
 import { ListItem, TaskItem, TaskList } from "@tiptap/extension-list";
 import { Mention } from "@tiptap/extension-mention";
 import { Strike } from "@tiptap/extension-strike";
@@ -18,8 +17,14 @@ import {
   Columns,
 } from "@/editor/tiptap-cores/nodes/column-node/column-node-schema";
 import { HorizontalRule } from "@/editor/tiptap-cores/nodes/horizontal-rule-node/horizontal-rule-node-extension";
+import { ContentImage } from "@/editor/tiptap-cores/nodes/image-node/image-node-schema";
 import { ImageUploadNode } from "@/editor/tiptap-cores/nodes/image-node/image-upload-node-schema";
 import { ContentTable } from "@/editor/tiptap-cores/nodes/table-node/table-node-schema";
+import { VideoEmbedNode } from "@/editor/tiptap-cores/nodes/video-embed-node/video-embed-node-schema";
+import {
+  VideoNode,
+  VideoUploadNode,
+} from "@/editor/tiptap-cores/nodes/video-node/video-node-schema";
 
 /**
  * The `StarterKit` entries that decide which nodes and marks exist. Shared by
@@ -143,8 +148,11 @@ export const createContentExtensions = (): Extensions => [
   AiAssistHighlight,
   ContentUniqueId,
   ContentTextAlign,
-  Image,
+  ContentImage,
   ImageUploadNode,
+  VideoEmbedNode,
+  VideoNode,
+  VideoUploadNode,
   // Not a rendering concern at first glance, but it owns the `id` and
   // `data-toc-id` attributes on headings. Leave it out and every heading in a
   // rendered document loses its anchor, breaking table-of-contents links.

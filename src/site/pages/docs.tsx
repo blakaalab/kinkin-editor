@@ -231,6 +231,12 @@ const PROP_ROWS = [
     description: "Enables image upload. Omit to disable.",
   },
   {
+    name: "videoUploadHandler",
+    type: "EditorVideoUploadHandler",
+    description:
+      "Enables video file upload — drop, paste, or Upload file in /video. Omit to disable.",
+  },
+  {
     name: "streamCompletion",
     type: "StreamCompletionFn",
     description: "Enables AI Assist. Omit to disable.",
@@ -669,7 +675,7 @@ export function DocsPage() {
                     name: "Types",
                     type: "RichTextEditorProps, …",
                     description:
-                      "Plus EditorImageUploadHandler, StreamCompletionFn, StreamCompletionParams.",
+                      "Plus EditorImageUploadHandler, EditorVideoUploadHandler, StreamCompletionFn, StreamCompletionParams.",
                   },
                 ]}
               />
