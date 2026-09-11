@@ -116,12 +116,11 @@ const createExtensions = (
 
   DropGuard,
   Placeholder.configure({
-    // The full hint does not fit a column, and reads as clutter three times
-    // over in a row of them.
-    placeholder: ({ editor, pos }) =>
-      editor.state.doc.resolve(pos).parent.type.name === "column"
-        ? "Write something…"
-        : "Write, type '/' for commands…",
+    // A string, not a function of position: the function runs while the next
+    // state is being built, when `editor.state` is still the previous one, so
+    // resolving `pos` against it throws whenever the documents differ in size.
+    // The shorter hint a column shows is the column stylesheet's job.
+    placeholder: "Write, type '/' for commands…",
     emptyNodeClass: "is-empty",
     // Without this the plugin only visits top-level nodes, so an empty
     // paragraph nested in a column (or a quote, or a list item) never gets a

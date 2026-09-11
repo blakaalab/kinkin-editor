@@ -60,4 +60,11 @@
       border-radius: 0.125rem;
     }
   }
+
+  // The full hint does not fit a column, and reads as clutter three times over
+  // in a row of them. Overrides the text the paragraph rule draws.
+  [data-type="column"]
+    > .is-empty[data-placeholder]:has(> .ProseMirror-trailingBreak:only-child)::before {
+    content: "Write something…";
+  }
 }
