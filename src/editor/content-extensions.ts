@@ -1,4 +1,5 @@
 import type { Extensions } from "@tiptap/core";
+import { CodeBlock } from "@tiptap/extension-code-block";
 import { Emoji, gitHubEmojis } from "@tiptap/extension-emoji";
 import { Highlight } from "@tiptap/extension-highlight";
 import { ListItem, TaskItem, TaskList } from "@tiptap/extension-list";
@@ -35,6 +36,7 @@ export const CONTENT_STARTER_KIT_OPTIONS = {
   horizontalRule: false,
   strike: false,
   listItem: false,
+  codeBlock: false,
 } satisfies Partial<StarterKitOptions>;
 
 /** Nodes that carry a stable `data-id`, for anchors and scroll-to-hash. */
@@ -78,6 +80,13 @@ export const AiAssistHighlight = Highlight.extend({
 
 /** List items hold blocks, so a bullet can contain a table or a code block. */
 export const BlockListItem = ListItem.extend({ content: "block+" });
+
+/**
+ * The plain `codeBlock` schema: `<pre><code class="language-…">`. The editor
+ * swaps in a lowlight version with the same schema; highlighting a rendered
+ * document is `highlightCodeBlocks`'s job.
+ */
+export const ContentCodeBlock = CodeBlock;
 
 /** Cells hold paragraphs only — no nested lists, tables or headings. */
 export const ParagraphTableHeader = TableHeader.extend({
@@ -131,6 +140,7 @@ export const createContentExtensions = (): Extensions => [
     trailingNode: false,
   }),
   BlockListItem,
+  ContentCodeBlock,
   HorizontalRule,
   Columns,
   Column,

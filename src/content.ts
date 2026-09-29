@@ -12,12 +12,16 @@
  *
  *   const html = generateHTML(doc, createContentExtensions());
  *   <div className={CONTENT_SCOPE_CLASS} dangerouslySetInnerHTML={{ __html: html }} />
+ *
+ * Code blocks render uncoloured; `highlightCodeBlocks(element)` colours them
+ * once the HTML is in a DOM.
  */
 export {
   AiAssistHighlight,
   AiAssistStrike,
   BlockListItem,
   CONTENT_STARTER_KIT_OPTIONS,
+  ContentCodeBlock,
   ContentEmoji,
   ContentUniqueId,
   createContentExtensions,
@@ -27,6 +31,10 @@ export {
   UNIQUE_ID_TYPES,
 } from "./editor/content-extensions";
 export { CONTENT_SCOPE_CLASS } from "./editor/content-scope";
+export {
+  CODE_BLOCK_LANGUAGES,
+  highlightCodeBlocks,
+} from "./editor/tiptap-cores/nodes/code-block-node/code-block-highlight";
 export { HorizontalRule } from "./editor/tiptap-cores/nodes/horizontal-rule-node/horizontal-rule-node-extension";
 export { ContentImage } from "./editor/tiptap-cores/nodes/image-node/image-node-schema";
 export { ImageUploadNode } from "./editor/tiptap-cores/nodes/image-node/image-upload-node-schema";

@@ -21,6 +21,13 @@
     padding: 1em;
     font-size: 1em;
     border-radius: 0.25em;
+    // Long lines scroll inside the block instead of spilling out of the
+    // content column. `pre` (not the `pre-wrap` the content root and
+    // ProseMirror set) keeps code on its own lines, as an IDE would.
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: pre;
+    overflow-wrap: normal;
 
     code {
       background-color: transparent;
@@ -29,5 +36,128 @@
       -webkit-text-fill-color: inherit;
       color: inherit;
     }
+
+    // Syntax colours, from the classes lowlight writes — as decorations in the
+    // editor, as real spans once `highlightCodeBlocks` has run on a page.
+    // Grouped the way GitHub's light theme groups them, one token per group.
+    .hljs-comment,
+    .hljs-quote,
+    .hljs-formula {
+      color: t.token("syntax-comment");
+      font-style: italic;
+    }
+
+    .hljs-keyword,
+    .hljs-doctag,
+    .hljs-type,
+    .hljs-template-tag,
+    .hljs-template-variable,
+    .hljs-variable.language_,
+    .hljs-meta .hljs-keyword {
+      color: t.token("syntax-keyword");
+    }
+
+    .hljs-string,
+    .hljs-regexp,
+    .hljs-meta .hljs-string {
+      color: t.token("syntax-string");
+    }
+
+    .hljs-number,
+    .hljs-literal,
+    .hljs-attr,
+    .hljs-attribute,
+    .hljs-variable,
+    .hljs-operator,
+    .hljs-meta,
+    .hljs-selector-attr,
+    .hljs-selector-class,
+    .hljs-selector-id,
+    .hljs-section {
+      color: t.token("syntax-constant");
+    }
+
+    .hljs-title,
+    .hljs-title.class_,
+    .hljs-title.function_ {
+      color: t.token("syntax-function");
+    }
+
+    .hljs-built_in,
+    .hljs-symbol,
+    .hljs-bullet,
+    .hljs-params {
+      color: t.token("syntax-builtin");
+    }
+
+    .hljs-name,
+    .hljs-selector-tag,
+    .hljs-selector-pseudo {
+      color: t.token("syntax-tag");
+    }
+
+    .hljs-addition {
+      color: t.token("syntax-addition");
+    }
+
+    .hljs-deletion {
+      color: t.token("syntax-deletion");
+    }
+
+    .hljs-section,
+    .hljs-strong {
+      font-weight: 600;
+    }
+
+    .hljs-emphasis {
+      font-style: italic;
+    }
+  }
+}
+
+@mixin editor {
+  .tiptap-core-code-block {
+    position: relative;
+  }
+
+  // The language picker: out of the way until the block is hovered. It sits outside `pre`, so it stays put while long lines scroll.
+  .tiptap-core-code-block-language {
+    position: absolute;
+    top: 0.375em;
+    right: 0.375em;
+    z-index: 1;
+    max-width: 10em;
+    padding: 0.125em 0.375em;
+    border: none;
+    border-radius: 0.25em;
+    background-color: t.token("codeblock-bg");
+    color: t.token("placeholder");
+    font-family: inherit;
+    font-size: 0.75em;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 120ms ease;
+
+    &:hover,
+    &:focus-visible {
+      color: t.token("code-text");
+    }
+  }
+
+  .tiptap-core-code-block:hover .tiptap-core-code-block-language,
+  .tiptap-core-code-block-language:focus-visible {
+    opacity: 1;
+  }
+
+  // No hover on touch screens: always show it there.
+  @media (hover: none) {
+    .tiptap-core-code-block-language {
+      opacity: 1;
+    }
+  }
+
+  // Read-only: the language is not something a reader can change.
+  &[contenteditable="false"] .tiptap-core-code-block-language {
+    display: none;
   }
 }

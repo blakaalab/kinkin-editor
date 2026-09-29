@@ -76,7 +76,7 @@ npm install @blakaa/kinkin-editor    # o: pnpm add @blakaa/kinkin-editor
 ```
 
 En npm 7+ y pnpm ese es todo el comando: ambos leen `peerDependencies` e instalan
-React y los 21 paquetes `@tiptap/*` por ti — no tienes que enumerarlos.
+React y los 24 paquetes `@tiptap/*` por ti — no tienes que enumerarlos.
 
 ### Yarn
 
@@ -86,7 +86,7 @@ Hay que indicarlas de forma explícita (la expansión de llaves lo deja en dos l
 ```bash
 yarn add @blakaa/kinkin-editor
 yarn add react react-dom \
-  @tiptap/{core,react,pm,starter-kit,extensions,markdown,suggestion,extension-emoji,extension-highlight,extension-history,extension-horizontal-rule,extension-image,extension-list,extension-mention,extension-strike,extension-table,extension-table-of-contents,extension-text-style,extension-typography,extension-unique-id,extension-drag-handle-react}
+  @tiptap/{core,react,pm,starter-kit,extensions,markdown,suggestion,extension-code-block,extension-code-block-lowlight,extension-emoji,extension-highlight,extension-history,extension-horizontal-rule,extension-image,extension-list,extension-mention,extension-strike,extension-table,extension-table-of-contents,extension-text-align,extension-text-style,extension-typography,extension-unique-id,extension-drag-handle-react}
 ```
 
 ### Por qué peer dependencies
@@ -256,6 +256,34 @@ Es un requisito de Tiptap, no de kinkin. (Con jsdom verás un aviso de
 `HTMLCanvasElement's getContext() method`: viene del sondeo de soporte de la
 extensión de emoji, que recurre correctamente a los emoji en imagen.)
 
+### Resaltado de sintaxis
+
+El editor colorea los bloques de código con [lowlight](https://github.com/wooorm/lowlight) (el conjunto `common` de
+highlight.js, ~35 lenguajes), y cada bloque tiene un selector de lenguaje. Sin
+ninguno elegido, el lenguaje se detecta automáticamente; "Plain text" desactiva
+el color. El lenguaje se guarda como `<code class="language-…">` y como el fence
+en markdown.
+
+Los colores en sí son decoraciones del editor, así que nunca llegan al documento
+guardado — `generateHTML` te da código plano. Coloréalo cuando el HTML ya esté en
+un DOM con `highlightCodeBlocks`, que aplica las mismas reglas que el editor:
+
+```tsx
+"use client";
+import { highlightCodeBlocks } from "@blakaa/kinkin-editor/content";
+
+const ref = useRef<HTMLElement>(null);
+useEffect(() => {
+  if (ref.current) highlightCodeBlocks(ref.current);
+}, [html]);
+
+<article ref={ref} className={CONTENT_SCOPE_CLASS} dangerouslySetInnerHTML={{ __html: html }} />
+```
+
+En un servidor, ejecútalo sobre el mismo árbol de jsdom / happy-dom que necesita
+`generateHTML`, y serializa el `innerHTML` de ese árbol. Ejecutarlo dos veces no
+hace daño.
+
 ### `content.css`
 
 La mitad de presentación. Solo reglas de contenido — sin barras de herramientas,
@@ -299,6 +327,15 @@ html.dark {
   --tt-core-table-stripe-bg: #191c23;
   --tt-core-tasklist-bg: #232733;
   --tt-core-tasklist-border: #5b6472;
+  --tt-core-syntax-comment: #8b949e;
+  --tt-core-syntax-keyword: #ff7b72;
+  --tt-core-syntax-string: #a5d6ff;
+  --tt-core-syntax-constant: #79c0ff;
+  --tt-core-syntax-function: #d2a8ff;
+  --tt-core-syntax-builtin: #ffa657;
+  --tt-core-syntax-tag: #7ee787;
+  --tt-core-syntax-addition: #aff5b4;
+  --tt-core-syntax-deletion: #ffa198;
 }
 ```
 
@@ -444,6 +481,7 @@ Si lo omites, los botones de IA no hacen nada y avisan por consola.
 | `EDITOR_SCOPE_CLASS` | `"kinkin-editor"` — la clase de ámbito, para etiquetar tus propios portales. |
 | `createContentExtensions()` | La lista de extensiones solo de esquema, para renderizar documentos guardados. También en `@blakaa/kinkin-editor/content`. |
 | `CONTENT_SCOPE_CLASS` | `"kinkin-content"` — la clase a la que `content.css` acota sus reglas. |
+| `highlightCodeBlocks(element)` | Colorea los bloques de código del HTML renderizado, como lo hace el editor. También en `@blakaa/kinkin-editor/content`. |
 | `<ToCItem />`, `<ToCEmptyState />` | Las piezas con las que se construye `<ToC />`, si quieres tu propio esquema. |
 | Tipos | `RichTextEditorProps`, `EditorImageUploadHandler`, `StreamCompletionFn`, `StreamCompletionParams` |
 

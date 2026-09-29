@@ -1,6 +1,6 @@
 {
   "name": "@blakaa/kinkin-editor",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "A drop-in rich text editor for React - a Notion-style WYSIWYG built on Tiptap, with slash commands, tables, images, markdown I/O and streaming AI Assist.",
   "license": "MIT",
   "type": "module",
@@ -74,6 +74,8 @@
   },
   "peerDependencies": {
     "@tiptap/core": "~3.31.3",
+    "@tiptap/extension-code-block": "~3.31.3",
+    "@tiptap/extension-code-block-lowlight": "~3.31.3",
     "@tiptap/extension-drag-handle-react": "~3.31.3",
     "@tiptap/extension-emoji": "~3.31.3",
     "@tiptap/extension-highlight": "~3.31.3",
@@ -108,6 +110,8 @@
     "clsx": "2.1.1",
     "dompurify": "3.4.0",
     "es-toolkit": "1.40.0",
+    "highlight.js": "11.11.1",
+    "lowlight": "3.3.0",
     "lucide-react": "0.563.0",
     "react-hotkeys-hook": "4.6.1",
     "tailwind-merge": "3.5.0"
@@ -116,6 +120,8 @@
     "@biomejs/biome": "^2.4.12",
     "@tailwindcss/vite": "4.2.4",
     "@tiptap/core": "3.31.3",
+    "@tiptap/extension-code-block": "3.31.3",
+    "@tiptap/extension-code-block-lowlight": "3.31.3",
     "@tiptap/extension-drag-handle-react": "3.31.3",
     "@tiptap/extension-emoji": "3.31.3",
     "@tiptap/extension-highlight": "3.31.3",
@@ -159,6 +165,7 @@
     "@tiptap/extension-bullet-list": "3.31.3",
     "@tiptap/extension-code": "3.31.3",
     "@tiptap/extension-code-block": "3.31.3",
+    "@tiptap/extension-code-block-lowlight": "3.31.3",
     "@tiptap/extension-collaboration": "3.31.3",
     "@tiptap/extension-document": "3.31.3",
     "@tiptap/extension-drag-handle": "3.31.3",

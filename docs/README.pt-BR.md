@@ -76,7 +76,7 @@ npm install @blakaa/kinkin-editor    # ou: pnpm add @blakaa/kinkin-editor
 ```
 
 No npm 7+ e no pnpm é só isso: os dois leem `peerDependencies` e instalam o React e
-todos os 21 pacotes `@tiptap/*` para você — não precisa listá-los.
+todos os 24 pacotes `@tiptap/*` para você — não precisa listá-los.
 
 ### Yarn
 
@@ -87,7 +87,7 @@ linhas):
 ```bash
 yarn add @blakaa/kinkin-editor
 yarn add react react-dom \
-  @tiptap/{core,react,pm,starter-kit,extensions,markdown,suggestion,extension-emoji,extension-highlight,extension-history,extension-horizontal-rule,extension-image,extension-list,extension-mention,extension-strike,extension-table,extension-table-of-contents,extension-text-style,extension-typography,extension-unique-id,extension-drag-handle-react}
+  @tiptap/{core,react,pm,starter-kit,extensions,markdown,suggestion,extension-code-block,extension-code-block-lowlight,extension-emoji,extension-highlight,extension-history,extension-horizontal-rule,extension-image,extension-list,extension-mention,extension-strike,extension-table,extension-table-of-contents,extension-text-align,extension-text-style,extension-typography,extension-unique-id,extension-drag-handle-react}
 ```
 
 ### Por que peer dependencies
@@ -256,6 +256,33 @@ Isso é um requisito do Tiptap, não do kinkin. (Com o jsdom você verá um avis
 `HTMLCanvasElement's getContext() method`: ele vem da sondagem de suporte da
 extensão de emoji, que corretamente recorre aos emoji em imagem.)
 
+### Realce de sintaxe
+
+O editor colore blocos de código com [lowlight](https://github.com/wooorm/lowlight) (o conjunto `common` do highlight.js,
+~35 linguagens), e cada bloco tem um seletor de linguagem. Sem nenhuma escolhida,
+a linguagem é detectada automaticamente; "Plain text" desliga as cores. A
+linguagem é salva como `<code class="language-…">` e como o fence no markdown.
+
+As cores em si são decorações do editor, então nunca chegam ao documento salvo
+— `generateHTML` entrega código puro. Colora-o quando o HTML já estiver em um DOM
+com `highlightCodeBlocks`, que aplica as mesmas regras do editor:
+
+```tsx
+"use client";
+import { highlightCodeBlocks } from "@blakaa/kinkin-editor/content";
+
+const ref = useRef<HTMLElement>(null);
+useEffect(() => {
+  if (ref.current) highlightCodeBlocks(ref.current);
+}, [html]);
+
+<article ref={ref} className={CONTENT_SCOPE_CLASS} dangerouslySetInnerHTML={{ __html: html }} />
+```
+
+No servidor, rode-o na mesma árvore jsdom / happy-dom de que o `generateHTML`
+precisa e serialize o `innerHTML` dessa árvore. Rodar duas vezes não causa
+problema.
+
 ### `content.css`
 
 A metade de exibição. Apenas regras de conteúdo — sem barras de ferramentas,
@@ -299,6 +326,15 @@ html.dark {
   --tt-core-table-stripe-bg: #191c23;
   --tt-core-tasklist-bg: #232733;
   --tt-core-tasklist-border: #5b6472;
+  --tt-core-syntax-comment: #8b949e;
+  --tt-core-syntax-keyword: #ff7b72;
+  --tt-core-syntax-string: #a5d6ff;
+  --tt-core-syntax-constant: #79c0ff;
+  --tt-core-syntax-function: #d2a8ff;
+  --tt-core-syntax-builtin: #ffa657;
+  --tt-core-syntax-tag: #7ee787;
+  --tt-core-syntax-addition: #aff5b4;
+  --tt-core-syntax-deletion: #ffa198;
 }
 ```
 
@@ -442,6 +478,7 @@ Se você omitir, os botões de IA viram no-ops, com um aviso no console.
 | `EDITOR_SCOPE_CLASS` | `"kinkin-editor"` — a classe de escopo, para marcar os seus próprios portais. |
 | `createContentExtensions()` | A lista de extensões só com o schema, para renderizar documentos salvos. Também em `@blakaa/kinkin-editor/content`. |
 | `CONTENT_SCOPE_CLASS` | `"kinkin-content"` — a classe à qual o `content.css` limita suas regras. |
+| `highlightCodeBlocks(element)` | Colore os blocos de código do HTML renderizado, como o editor faz. Também em `@blakaa/kinkin-editor/content`. |
 | `<ToCItem />`, `<ToCEmptyState />` | As peças que formam o `<ToC />`, se você quiser o seu próprio layout de sumário. |
 | Tipos | `RichTextEditorProps`, `EditorImageUploadHandler`, `StreamCompletionFn`, `StreamCompletionParams` |
 

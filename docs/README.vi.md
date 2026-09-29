@@ -74,7 +74,7 @@ npm install @blakaa/kinkin-editor    # hoặc: pnpm add @blakaa/kinkin-editor
 ```
 
 Với npm 7+ và pnpm thì chỉ cần vậy: cả hai đều đọc `peerDependencies` và tự cài
-React cùng toàn bộ 21 gói `@tiptap/*` cho bạn — bạn không cần liệt kê chúng.
+React cùng toàn bộ 24 gói `@tiptap/*` cho bạn — bạn không cần liệt kê chúng.
 
 ### Yarn
 
@@ -84,7 +84,7 @@ tường minh (dùng brace expansion cho gọn còn hai dòng):
 ```bash
 yarn add @blakaa/kinkin-editor
 yarn add react react-dom \
-  @tiptap/{core,react,pm,starter-kit,extensions,markdown,suggestion,extension-emoji,extension-highlight,extension-history,extension-horizontal-rule,extension-image,extension-list,extension-mention,extension-strike,extension-table,extension-table-of-contents,extension-text-style,extension-typography,extension-unique-id,extension-drag-handle-react}
+  @tiptap/{core,react,pm,starter-kit,extensions,markdown,suggestion,extension-code-block,extension-code-block-lowlight,extension-emoji,extension-highlight,extension-history,extension-horizontal-rule,extension-image,extension-list,extension-mention,extension-strike,extension-table,extension-table-of-contents,extension-text-align,extension-text-style,extension-typography,extension-unique-id,extension-drag-handle-react}
 ```
 
 ### Vì sao phải dùng peer dependencies
@@ -252,6 +252,32 @@ cầu của Tiptap, không phải của kinkin. (Với jsdom bạn sẽ thấy m
 `HTMLCanvasElement's getContext() method`: nó đến từ bước dò hỗ trợ của extension
 emoji, và extension này chuyển đúng sang emoji dạng ảnh.)
 
+### Tô màu cú pháp
+
+Editor tô màu code block bằng [lowlight](https://github.com/wooorm/lowlight) (bộ `common` của highlight.js, khoảng 35
+ngôn ngữ), và mỗi khối có một dropdown chọn ngôn ngữ. Khi chưa chọn, ngôn ngữ
+được tự nhận diện; "Plain text" thì tắt tô màu. Ngôn ngữ được lưu thành
+`<code class="language-…">` và thành fence trong markdown.
+
+Bản thân màu sắc là decoration của editor, nên không bao giờ đi vào tài liệu đã
+lưu — `generateHTML` trả về code trơn. Hãy tô màu nó khi HTML đã nằm trong DOM
+bằng `highlightCodeBlocks`, hàm này áp dụng đúng các quy tắc editor dùng:
+
+```tsx
+"use client";
+import { highlightCodeBlocks } from "@blakaa/kinkin-editor/content";
+
+const ref = useRef<HTMLElement>(null);
+useEffect(() => {
+  if (ref.current) highlightCodeBlocks(ref.current);
+}, [html]);
+
+<article ref={ref} className={CONTENT_SCOPE_CLASS} dangerouslySetInnerHTML={{ __html: html }} />
+```
+
+Trên server, chạy nó trên chính cây jsdom / happy-dom mà `generateHTML` cần, rồi
+serialize `innerHTML` của cây đó. Chạy hai lần cũng không sao.
+
 ### `content.css`
 
 Nửa dành cho hiển thị. Chỉ gồm các rule cho nội dung — không thanh công cụ, menu,
@@ -295,6 +321,15 @@ html.dark {
   --tt-core-table-stripe-bg: #191c23;
   --tt-core-tasklist-bg: #232733;
   --tt-core-tasklist-border: #5b6472;
+  --tt-core-syntax-comment: #8b949e;
+  --tt-core-syntax-keyword: #ff7b72;
+  --tt-core-syntax-string: #a5d6ff;
+  --tt-core-syntax-constant: #79c0ff;
+  --tt-core-syntax-function: #d2a8ff;
+  --tt-core-syntax-builtin: #ffa657;
+  --tt-core-syntax-tag: #7ee787;
+  --tt-core-syntax-addition: #aff5b4;
+  --tt-core-syntax-deletion: #ffa198;
 }
 ```
 
@@ -438,6 +473,7 @@ Bỏ nó đi thì các nút AI thành vô tác dụng, kèm một cảnh báo tr
 | `EDITOR_SCOPE_CLASS` | `"kinkin-editor"` — class phạm vi, dùng để gắn cho portal của riêng bạn. |
 | `createContentExtensions()` | Danh sách extension chỉ gồm schema, dùng để render tài liệu đã lưu. Cũng có tại `@blakaa/kinkin-editor/content`. |
 | `CONTENT_SCOPE_CLASS` | `"kinkin-content"` — class mà `content.css` giới hạn phạm vi vào. |
+| `highlightCodeBlocks(element)` | Tô màu code block trong HTML đã render, giống như editor. Cũng có ở `@blakaa/kinkin-editor/content`. |
 | `<ToCItem />`, `<ToCEmptyState />` | Các mảnh ghép tạo nên `<ToC />`, nếu bạn muốn tự dựng bố cục mục lục. |
 | Types | `RichTextEditorProps`, `EditorImageUploadHandler`, `StreamCompletionFn`, `StreamCompletionParams` |
 

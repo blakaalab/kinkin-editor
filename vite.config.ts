@@ -93,6 +93,11 @@ export default defineConfig(({ mode, command }) => {
                 "react-dom/client",
                 /^@tiptap\//,
                 /^prosemirror-/,
+                // Resolved by the host's package manager instead of inlined, so
+                // the grammars are not shipped twice when the host highlights
+                // code too.
+                "lowlight",
+                /^highlight\.js/,
               ],
             },
           },

@@ -51,6 +51,7 @@ import {
   clearEditorHistory,
   sanitizeNode,
 } from "@/editor/tiptap-cores/lib/tiptap-utils";
+import { EditorCodeBlock } from "@/editor/tiptap-cores/nodes/code-block-node/code-block-node-extension";
 import { EditorImage } from "@/editor/tiptap-cores/nodes/image-node/image-node-extension";
 import { ImageUpload } from "@/editor/tiptap-cores/nodes/image-node/image-upload-node-extension";
 import { CustomTable } from "@/editor/tiptap-cores/nodes/table-node/table-node-extension";
@@ -92,6 +93,8 @@ const withEditorBehaviour = (
         dropcursor: { width: 2, color: false },
         link: { openOnClick: false },
       });
+    case "codeBlock":
+      return EditorCodeBlock;
     case "table":
       return CustomTable;
     case "image":

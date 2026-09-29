@@ -99,7 +99,7 @@ npm install @blakaa/kinkin-editor    # or: pnpm add @blakaa/kinkin-editor
 ```
 
 That's the whole command on npm 7+ and pnpm: both read `peerDependencies` and
-install React and all 21 `@tiptap/*` packages for you — you don't list them.
+install React and all 24 `@tiptap/*` packages for you — you don't list them.
 
 ### Yarn
 
@@ -109,7 +109,7 @@ need them explicitly (brace expansion keeps it to two lines):
 ```bash
 yarn add @blakaa/kinkin-editor
 yarn add react react-dom \
-  @tiptap/{core,react,pm,starter-kit,extensions,markdown,suggestion,extension-emoji,extension-highlight,extension-history,extension-horizontal-rule,extension-image,extension-list,extension-mention,extension-strike,extension-table,extension-table-of-contents,extension-text-align,extension-text-style,extension-typography,extension-unique-id,extension-drag-handle-react}
+  @tiptap/{core,react,pm,starter-kit,extensions,markdown,suggestion,extension-code-block,extension-code-block-lowlight,extension-emoji,extension-highlight,extension-history,extension-horizontal-rule,extension-image,extension-list,extension-mention,extension-strike,extension-table,extension-table-of-contents,extension-text-align,extension-text-style,extension-typography,extension-unique-id,extension-drag-handle-react}
 ```
 
 ### Why peer dependencies at all
@@ -295,6 +295,33 @@ That is a Tiptap requirement, not a kinkin one. (With jsdom you'll see one
 `HTMLCanvasElement's getContext() method` warning: it comes from the emoji
 extension's support probe, which correctly falls back to image emoji.)
 
+### Syntax highlighting
+
+The editor colours code blocks with [lowlight](https://github.com/wooorm/lowlight)
+(highlight.js's `common` set, ~35 languages), and each block has a language
+picker; with none picked, the language is auto-detected, and "Plain text" turns
+colouring off. The language is saved as `<code class="language-…">` and as the
+fence in markdown.
+
+The colours themselves are editor decorations, so they never reach the saved
+document — `generateHTML` gives you plain code. Colour it once the HTML is in a
+DOM with `highlightCodeBlocks`, which applies the same rules the editor does:
+
+```tsx
+"use client";
+import { highlightCodeBlocks } from "@blakaa/kinkin-editor/content";
+
+const ref = useRef<HTMLElement>(null);
+useEffect(() => {
+  if (ref.current) highlightCodeBlocks(ref.current);
+}, [html]);
+
+<article ref={ref} className={CONTENT_SCOPE_CLASS} dangerouslySetInnerHTML={{ __html: html }} />
+```
+
+On a server, run it on the same jsdom / happy-dom tree `generateHTML` needs, and
+serialise that tree's `innerHTML` instead. Running it twice is harmless.
+
 ### `content.css`
 
 The display half. Content rules only — no toolbars, menus, selection or drag
@@ -336,6 +363,15 @@ html.dark {
   --tt-core-table-stripe-bg: #191c23;
   --tt-core-tasklist-bg: #232733;
   --tt-core-tasklist-border: #5b6472;
+  --tt-core-syntax-comment: #8b949e;
+  --tt-core-syntax-keyword: #ff7b72;
+  --tt-core-syntax-string: #a5d6ff;
+  --tt-core-syntax-constant: #79c0ff;
+  --tt-core-syntax-function: #d2a8ff;
+  --tt-core-syntax-builtin: #ffa657;
+  --tt-core-syntax-tag: #7ee787;
+  --tt-core-syntax-addition: #aff5b4;
+  --tt-core-syntax-deletion: #ffa198;
 }
 ```
 
@@ -521,6 +557,7 @@ Omit it and the AI buttons become no-ops, with a console warning.
 | `EDITOR_SCOPE_CLASS` | `"kinkin-editor"` — the scope class, for tagging your own portals. |
 | `createContentExtensions()` | The schema-only extension list, for rendering saved documents. Also at `@blakaa/kinkin-editor/content`. |
 | `CONTENT_SCOPE_CLASS` | `"kinkin-content"` — the class `content.css` scopes to. |
+| `highlightCodeBlocks(element)` | Colours the code blocks of rendered HTML, the way the editor does. Also at `@blakaa/kinkin-editor/content`. |
 | `<ToCItem />`, `<ToCEmptyState />` | The pieces `<ToC />` is built from, if you want your own outline layout. |
 | Types | `RichTextEditorProps`, `EditorImageUploadHandler`, `EditorVideoUploadHandler`, `StreamCompletionFn`, `StreamCompletionParams` |
 

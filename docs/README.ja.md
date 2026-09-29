@@ -75,7 +75,7 @@ npm install @blakaa/kinkin-editor    # または: pnpm add @blakaa/kinkin-editor
 ```
 
 npm 7 以降と pnpm ではこれだけです。どちらも `peerDependencies` を読み取り、React と
-21 個の `@tiptap/*` パッケージすべてを自動で入れてくれるので、列挙する必要はありません。
+24 個の `@tiptap/*` パッケージすべてを自動で入れてくれるので、列挙する必要はありません。
 
 ### Yarn
 
@@ -85,7 +85,7 @@ Yarn は Classic も Berry も peer dependencies を**自動インストール�
 ```bash
 yarn add @blakaa/kinkin-editor
 yarn add react react-dom \
-  @tiptap/{core,react,pm,starter-kit,extensions,markdown,suggestion,extension-emoji,extension-highlight,extension-history,extension-horizontal-rule,extension-image,extension-list,extension-mention,extension-strike,extension-table,extension-table-of-contents,extension-text-style,extension-typography,extension-unique-id,extension-drag-handle-react}
+  @tiptap/{core,react,pm,starter-kit,extensions,markdown,suggestion,extension-code-block,extension-code-block-lowlight,extension-emoji,extension-highlight,extension-history,extension-horizontal-rule,extension-image,extension-list,extension-mention,extension-strike,extension-table,extension-table-of-contents,extension-text-align,extension-text-style,extension-typography,extension-unique-id,extension-drag-handle-react}
 ```
 
 ### なぜ peer dependencies なのか
@@ -253,6 +253,33 @@ export function Post({ doc }: { doc: JSONContent }) {
 `HTMLCanvasElement's getContext() method` という警告が 1 件出ます。emoji 拡張のサポート判定
 によるもので、拡張は正しく画像 emoji にフォールバックします。）
 
+### シンタックスハイライト
+
+エディタはコードブロックを [lowlight](https://github.com/wooorm/lowlight)（highlight.js の `common` セット、約 35 言語）で
+色付けし、各ブロックには言語ピッカーがあります。未選択なら言語は自動判定され、
+「Plain text」を選ぶと色付けしません。言語は `<code class="language-…">` として、
+また markdown ではフェンスとして保存されます。
+
+色そのものはエディタのデコレーションなので、保存されたドキュメントには
+入りません — `generateHTML` が返すのはプレーンなコードです。HTML が DOM に
+入ったあとで `highlightCodeBlocks` を呼ぶと、エディタと同じルールで色付けされます：
+
+```tsx
+"use client";
+import { highlightCodeBlocks } from "@blakaa/kinkin-editor/content";
+
+const ref = useRef<HTMLElement>(null);
+useEffect(() => {
+  if (ref.current) highlightCodeBlocks(ref.current);
+}, [html]);
+
+<article ref={ref} className={CONTENT_SCOPE_CLASS} dangerouslySetInnerHTML={{ __html: html }} />
+```
+
+サーバーでは、`generateHTML` が必要とするのと同じ jsdom / happy-dom のツリーに
+対して実行し、そのツリーの `innerHTML` をシリアライズしてください。
+2 回実行しても問題ありません。
+
 ### `content.css`
 
 表示側の半分です。含まれるのはコンテンツのルールだけ — ツールバー、メニュー、選択範囲、
@@ -293,6 +320,15 @@ html.dark {
   --tt-core-table-stripe-bg: #191c23;
   --tt-core-tasklist-bg: #232733;
   --tt-core-tasklist-border: #5b6472;
+  --tt-core-syntax-comment: #8b949e;
+  --tt-core-syntax-keyword: #ff7b72;
+  --tt-core-syntax-string: #a5d6ff;
+  --tt-core-syntax-constant: #79c0ff;
+  --tt-core-syntax-function: #d2a8ff;
+  --tt-core-syntax-builtin: #ffa657;
+  --tt-core-syntax-tag: #7ee787;
+  --tt-core-syntax-addition: #aff5b4;
+  --tt-core-syntax-deletion: #ffa198;
 }
 ```
 
@@ -434,6 +470,7 @@ const streamCompletion: StreamCompletionFn = async ({
 | `EDITOR_SCOPE_CLASS` | `"kinkin-editor"` — スコープクラス。自前の portal に付けるため。 |
 | `createContentExtensions()` | 保存済みドキュメントを描画するための、スキーマだけの拡張リスト。`@blakaa/kinkin-editor/content` からも取得できます。 |
 | `CONTENT_SCOPE_CLASS` | `"kinkin-content"` — `content.css` が適用範囲とするクラス。 |
+| `highlightCodeBlocks(element)` | 描画済み HTML のコードブロックを、エディタと同じように色付けします。`@blakaa/kinkin-editor/content` からも使えます。 |
 | `<ToCItem />`、`<ToCEmptyState />` | `<ToC />` を構成する部品。独自のアウトライン配置を作るときに。 |
 | 型 | `RichTextEditorProps`、`EditorImageUploadHandler`、`StreamCompletionFn`、`StreamCompletionParams` |
 

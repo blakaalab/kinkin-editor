@@ -77,7 +77,7 @@ npm install @blakaa/kinkin-editor    # oder: pnpm add @blakaa/kinkin-editor
 ```
 
 Auf npm 7+ und pnpm ist das der ganze Befehl: Beide lesen `peerDependencies` und
-installieren React sowie alle 21 `@tiptap/*`-Pakete für dich — du musst sie nicht
+installieren React sowie alle 24 `@tiptap/*`-Pakete für dich — du musst sie nicht
 auflisten.
 
 ### Yarn
@@ -88,7 +88,7 @@ Du brauchst sie explizit (mit Klammer-Expansion bleibt es bei zwei Zeilen):
 ```bash
 yarn add @blakaa/kinkin-editor
 yarn add react react-dom \
-  @tiptap/{core,react,pm,starter-kit,extensions,markdown,suggestion,extension-emoji,extension-highlight,extension-history,extension-horizontal-rule,extension-image,extension-list,extension-mention,extension-strike,extension-table,extension-table-of-contents,extension-text-style,extension-typography,extension-unique-id,extension-drag-handle-react}
+  @tiptap/{core,react,pm,starter-kit,extensions,markdown,suggestion,extension-code-block,extension-code-block-lowlight,extension-emoji,extension-highlight,extension-history,extension-horizontal-rule,extension-image,extension-list,extension-mention,extension-strike,extension-table,extension-table-of-contents,extension-text-align,extension-text-style,extension-typography,extension-unique-id,extension-drag-handle-react}
 ```
 
 ### Warum überhaupt Peer-Dependencies
@@ -259,6 +259,34 @@ Aufruf. Das ist eine Anforderung von Tiptap, nicht von kinkin. (Mit jsdom siehst
 du eine `HTMLCanvasElement's getContext() method`-Warnung: Sie stammt aus der
 Support-Prüfung der Emoji-Extension, die korrekt auf Bild-Emoji zurückfällt.)
 
+### Syntax-Highlighting
+
+Der Editor färbt Codeblöcke mit [lowlight](https://github.com/wooorm/lowlight) (dem `common`-Set von highlight.js, rund
+35 Sprachen), und jeder Block hat eine Sprachauswahl. Ist keine gewählt, wird die
+Sprache automatisch erkannt; „Plain text“ schaltet die Färbung ab. Die Sprache
+wird als `<code class="language-…">` und als Fence im Markdown gespeichert.
+
+Die Farben selbst sind Editor-Decorations und landen daher nie im gespeicherten
+Dokument — `generateHTML` liefert reinen Code. Färbe ihn, sobald das HTML in
+einem DOM steckt, mit `highlightCodeBlocks`, das dieselben Regeln wie der Editor
+anwendet:
+
+```tsx
+"use client";
+import { highlightCodeBlocks } from "@blakaa/kinkin-editor/content";
+
+const ref = useRef<HTMLElement>(null);
+useEffect(() => {
+  if (ref.current) highlightCodeBlocks(ref.current);
+}, [html]);
+
+<article ref={ref} className={CONTENT_SCOPE_CLASS} dangerouslySetInnerHTML={{ __html: html }} />
+```
+
+Auf dem Server führst du es auf demselben jsdom-/happy-dom-Baum aus, den
+`generateHTML` braucht, und serialisierst danach dessen `innerHTML`. Zweimal
+ausführen schadet nicht.
+
 ### `content.css`
 
 Die Darstellungshälfte. Nur Content-Regeln — keine Toolbars, Menüs, Auswahl- oder
@@ -301,6 +329,15 @@ html.dark {
   --tt-core-table-stripe-bg: #191c23;
   --tt-core-tasklist-bg: #232733;
   --tt-core-tasklist-border: #5b6472;
+  --tt-core-syntax-comment: #8b949e;
+  --tt-core-syntax-keyword: #ff7b72;
+  --tt-core-syntax-string: #a5d6ff;
+  --tt-core-syntax-constant: #79c0ff;
+  --tt-core-syntax-function: #d2a8ff;
+  --tt-core-syntax-builtin: #ffa657;
+  --tt-core-syntax-tag: #7ee787;
+  --tt-core-syntax-addition: #aff5b4;
+  --tt-core-syntax-deletion: #ffa198;
 }
 ```
 
@@ -446,6 +483,7 @@ Lässt du es weg, werden die KI-Buttons wirkungslos, mit einer Warnung in der Ko
 | `EDITOR_SCOPE_CLASS` | `"kinkin-editor"` — die Scope-Klasse, um eigene Portale zu kennzeichnen. |
 | `createContentExtensions()` | Die Extension-Liste nur mit dem Schema, zum Rendern gespeicherter Dokumente. Auch unter `@blakaa/kinkin-editor/content`. |
 | `CONTENT_SCOPE_CLASS` | `"kinkin-content"` — die Klasse, auf die `content.css` seine Regeln begrenzt. |
+| `highlightCodeBlocks(element)` | Färbt die Codeblöcke von gerendertem HTML so, wie es der Editor tut. Auch unter `@blakaa/kinkin-editor/content`. |
 | `<ToCItem />`, `<ToCEmptyState />` | Die Bausteine von `<ToC />`, falls du ein eigenes Gliederungs-Layout willst. |
 | Typen | `RichTextEditorProps`, `EditorImageUploadHandler`, `StreamCompletionFn`, `StreamCompletionParams` |
 

@@ -73,7 +73,7 @@ npm install @blakaa/kinkin-editor    # 或者：pnpm add @blakaa/kinkin-editor
 ```
 
 在 npm 7+ 和 pnpm 上这就是全部命令：两者都会读取 `peerDependencies`，自动为你安装
-React 和全部 21 个 `@tiptap/*` 包 —— 你不需要一一列出。
+React 和全部 24 个 `@tiptap/*` 包 —— 你不需要一一列出。
 
 ### Yarn
 
@@ -83,7 +83,7 @@ Yarn **不会**自动安装 peer 依赖 —— Classic 和 Berry 都不会。你
 ```bash
 yarn add @blakaa/kinkin-editor
 yarn add react react-dom \
-  @tiptap/{core,react,pm,starter-kit,extensions,markdown,suggestion,extension-emoji,extension-highlight,extension-history,extension-horizontal-rule,extension-image,extension-list,extension-mention,extension-strike,extension-table,extension-table-of-contents,extension-text-style,extension-typography,extension-unique-id,extension-drag-handle-react}
+  @tiptap/{core,react,pm,starter-kit,extensions,markdown,suggestion,extension-code-block,extension-code-block-lowlight,extension-emoji,extension-highlight,extension-history,extension-horizontal-rule,extension-image,extension-list,extension-mention,extension-strike,extension-table,extension-table-of-contents,extension-text-align,extension-text-style,extension-typography,extension-unique-id,extension-drag-handle-react}
 ```
 
 ### 为什么要用 peer 依赖
@@ -242,6 +242,31 @@ export function Post({ doc }: { doc: JSONContent }) {
 （使用 jsdom 时你会看到一条 `HTMLCanvasElement's getContext() method` 警告：它来自 emoji
 扩展的能力探测，该扩展会正确地回退到图片 emoji。）
 
+### 语法高亮
+
+编辑器用 [lowlight](https://github.com/wooorm/lowlight)（highlight.js 的 `common` 集合，约 35 种语言）为代码块着色，
+每个代码块都有一个语言选择器。未选择时自动识别语言；选“Plain text”则不着色。
+语言会保存为 `<code class="language-…">`，在 markdown 中保存为代码围栏的语言标记。
+
+颜色本身是编辑器的 decoration，因此永远不会进入保存的文档 —— `generateHTML`
+给你的是纯代码。等 HTML 进入 DOM 后，用 `highlightCodeBlocks` 着色，它使用与编辑器
+相同的规则：
+
+```tsx
+"use client";
+import { highlightCodeBlocks } from "@blakaa/kinkin-editor/content";
+
+const ref = useRef<HTMLElement>(null);
+useEffect(() => {
+  if (ref.current) highlightCodeBlocks(ref.current);
+}, [html]);
+
+<article ref={ref} className={CONTENT_SCOPE_CLASS} dangerouslySetInnerHTML={{ __html: html }} />
+```
+
+在服务端，对 `generateHTML` 所需的同一棵 jsdom / happy-dom 树运行它，再序列化
+这棵树的 `innerHTML`。运行两次也没问题。
+
 ### `content.css`
 
 用于展示的那一半。只包含内容规则 —— 没有工具栏、菜单、选区或拖拽相关的样式，没有 Tailwind
@@ -280,6 +305,15 @@ html.dark {
   --tt-core-table-stripe-bg: #191c23;
   --tt-core-tasklist-bg: #232733;
   --tt-core-tasklist-border: #5b6472;
+  --tt-core-syntax-comment: #8b949e;
+  --tt-core-syntax-keyword: #ff7b72;
+  --tt-core-syntax-string: #a5d6ff;
+  --tt-core-syntax-constant: #79c0ff;
+  --tt-core-syntax-function: #d2a8ff;
+  --tt-core-syntax-builtin: #ffa657;
+  --tt-core-syntax-tag: #7ee787;
+  --tt-core-syntax-addition: #aff5b4;
+  --tt-core-syntax-deletion: #ffa198;
 }
 ```
 
@@ -417,6 +451,7 @@ const streamCompletion: StreamCompletionFn = async ({
 | `EDITOR_SCOPE_CLASS` | `"kinkin-editor"` —— 作用域 class，用于标记你自己的 portal。 |
 | `createContentExtensions()` | 只含 schema 的扩展清单，用于渲染已保存的文档。也可从 `@blakaa/kinkin-editor/content` 引入。 |
 | `CONTENT_SCOPE_CLASS` | `"kinkin-content"` —— `content.css` 所限定的类名。 |
+| `highlightCodeBlocks(element)` | 按编辑器的方式为已渲染 HTML 中的代码块着色。也可从 `@blakaa/kinkin-editor/content` 导入。 |
 | `<ToCItem />`、`<ToCEmptyState />` | 构成 `<ToC />` 的零件，便于你自定义大纲布局。 |
 | 类型 | `RichTextEditorProps`、`EditorImageUploadHandler`、`StreamCompletionFn`、`StreamCompletionParams` |
 
