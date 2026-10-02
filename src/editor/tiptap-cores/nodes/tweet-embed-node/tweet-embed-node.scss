@@ -1,0 +1,66 @@
+@use "../../styles/tokens" as t;
+
+@mixin content {
+  // Same rhythm as images and videos: its own margin, collapsing with a
+  // neighbour's.
+  [data-type="tweetEmbed"] {
+    margin: 1.125em 0;
+
+    &:first-child {
+      margin-top: 0;
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    // An embed that never got its link renders as an empty element.
+    &:empty {
+      display: none;
+    }
+
+    // X lays a post out between 250 and 550 pixels wide, centred like a
+    // narrowed image. The height is a stand-in until the post reports its own
+    // — the editor listens for that; a page needs `resizeTweetEmbeds`.
+    iframe {
+      display: block;
+      width: 100%;
+      max-width: 550px;
+      height: 25em;
+      margin-inline: auto;
+      border: 0;
+      border-radius: 0.75rem;
+    }
+  }
+}
+
+@mixin editor {
+  // The renderer's element is the block and carries the rhythm; the wrapper's
+  // own margins would otherwise land inside it.
+  .node-tweetEmbed {
+    margin: 1.125em 0;
+
+    &:first-child {
+      margin-top: 0;
+    }
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    > [data-node-view-wrapper] {
+      margin-block: 0;
+    }
+
+    // Outline the post, or the link field — not the full-width row.
+    &.ProseMirror-selectednode :is(iframe, form) {
+      outline: 2px solid t.token("dropcursor");
+      outline-offset: 2px;
+    }
+  }
+
+  // Read-only, with no link: nothing to show, and no margin to leave behind.
+  .node-tweetEmbed:has(> [data-type="tweetEmbed"]:empty) {
+    display: none;
+  }
+}

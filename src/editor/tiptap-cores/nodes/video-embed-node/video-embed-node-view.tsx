@@ -1,12 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 import { NodeSelection } from "@tiptap/pm/state";
 import { type NodeViewProps, NodeViewWrapper } from "@tiptap/react";
-import { AlertCircle, Upload, Video } from "lucide-react";
+import { Video } from "lucide-react";
 
 import { useUiEditorState } from "@/editor/tiptap-cores/hooks/use-ui-editor-state";
+import { EmbedLinkField } from "@/editor/tiptap-cores/ui/embed-link-field";
 import { ResizableMedia } from "@/editor/tiptap-cores/ui/resizable-media";
-import { cn } from "@/lib/utils";
 
 import { setCursorAfterNode } from "../../lib/tiptap-utils";
 import {
@@ -25,123 +25,6 @@ const errorFor = (value: string): string =>
   isTiktokShortLink(value)
     ? "Short TikTok links can't be embedded. Open the video and copy the link from the address bar."
     : "That isn't a YouTube or TikTok video link.";
-
-const LinkField = ({
-  onSubmit,
-  onLeave,
-  onRemove,
-  onUpload,
-  acceptedTypes,
-  autoFocus,
-}: {
-  onSubmit: (src: string) => string | null;
-  onLeave: () => void;
-  onRemove: () => void;
-  onUpload: (file: File) => void;
-  /** `null` while no upload handler is configured: no upload button then. */
-  acceptedTypes: string[] | null;
-  autoFocus: boolean;
-}) => {
-  const [value, setValue] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (!autoFocus) {
-      return;
-    }
-
-    // The slash menu closes as the embed goes in and hands focus back to the
-    // editor — in an animation frame, since the selection is not a text
-    // selection. Taken now, the focus would be taken straight back. Two frames
-    // rather than one: this effect can run before the menu queues its frame,
-    // and a frame queued inside a frame always runs after it.
-    let frame = requestAnimationFrame(() => {
-      frame = requestAnimationFrame(() => inputRef.current?.focus());
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [autoFocus]);
-
-  return (
-    <form
-      className={cn(
-        "flex flex-col gap-2 rounded-md border border-dashed bg-background p-3",
-        error ? "border-red-300" : "border-gray-500",
-      )}
-      onSubmit={(e) => {
-        e.preventDefault();
-        setError(onSubmit(value));
-      }}
-    >
-      <div className="flex items-center gap-2">
-        <Video className="size-5 shrink-0 text-placeholder" strokeWidth={1.5} />
-        <input
-          ref={inputRef}
-          type="url"
-          value={value}
-          placeholder="Paste a YouTube or TikTok link…"
-          aria-label="Video link"
-          aria-invalid={!!error}
-          className="flex-1 min-w-0 bg-transparent text-sm text-control outline-none placeholder:text-placeholder"
-          onChange={(e) => {
-            setValue(e.target.value);
-            setError(null);
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Escape") {
-              e.preventDefault();
-              onLeave();
-            } else if (e.key === "Backspace" && !value) {
-              e.preventDefault();
-              onRemove();
-            }
-          }}
-        />
-        <button
-          type="submit"
-          disabled={!value.trim()}
-          className="shrink-0 rounded px-2.5 py-1 text-sm font-medium text-primary-600 transition-colors hover:bg-primary-50 disabled:pointer-events-none disabled:opacity-50"
-        >
-          Embed
-        </button>
-        {acceptedTypes && (
-          <>
-            <span className="h-4 w-px shrink-0 bg-gray-300" />
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="flex shrink-0 items-center gap-1.5 rounded px-2.5 py-1 text-sm font-medium text-control transition-colors hover:bg-accent"
-            >
-              <Upload className="size-3.5" />
-              Upload file
-            </button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept={acceptedTypes.join(",")}
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                e.target.value = "";
-
-                if (file) {
-                  onUpload(file);
-                }
-              }}
-            />
-          </>
-        )}
-      </div>
-      {error && (
-        <div className="flex items-start gap-1.5 text-xs text-red-500">
-          <AlertCircle className="mt-px size-3.5 shrink-0" />
-          <span>{error}</span>
-        </div>
-      )}
-    </form>
-  );
-};
 
 export const VideoEmbedNodeView = ({
   node,
@@ -241,7 +124,10 @@ export const VideoEmbedNodeView = ({
 
   return (
     <NodeViewWrapper data-type="videoEmbed">
-      <LinkField
+      <EmbedLinkField
+        icon={Video}
+        placeholder="Paste a YouTube or TikTok link…"
+        label="Video link"
         onSubmit={handleSubmit}
         onLeave={handleLeave}
         onRemove={handleRemove}

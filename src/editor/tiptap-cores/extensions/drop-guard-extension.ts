@@ -10,6 +10,7 @@ const BLOCKED_IN_BLOCKQUOTE = new Set([
   "videoEmbed",
   "video",
   "videoUpload",
+  "tweetEmbed",
 ]);
 
 const findRestrictedAncestor = (

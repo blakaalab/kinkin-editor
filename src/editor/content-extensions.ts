@@ -21,6 +21,7 @@ import { HorizontalRule } from "@/editor/tiptap-cores/nodes/horizontal-rule-node
 import { ContentImage } from "@/editor/tiptap-cores/nodes/image-node/image-node-schema";
 import { ImageUploadNode } from "@/editor/tiptap-cores/nodes/image-node/image-upload-node-schema";
 import { ContentTable } from "@/editor/tiptap-cores/nodes/table-node/table-node-schema";
+import { TweetEmbedNode } from "@/editor/tiptap-cores/nodes/tweet-embed-node/tweet-embed-node-schema";
 import { VideoEmbedNode } from "@/editor/tiptap-cores/nodes/video-embed-node/video-embed-node-schema";
 import {
   VideoNode,
@@ -163,6 +164,7 @@ export const createContentExtensions = (): Extensions => [
   VideoEmbedNode,
   VideoNode,
   VideoUploadNode,
+  TweetEmbedNode,
   // Not a rendering concern at first glance, but it owns the `id` and
   // `data-toc-id` attributes on headings. Leave it out and every heading in a
   // rendered document loses its anchor, breaking table-of-contents links.

@@ -66,7 +66,7 @@ export function Editor() {
 // the slash menu in slash-command-suggestion-menu-utils.ts, the @tiptap/*
 // peerDependencies, the outputContentType union, and the three toolbars.
 const STATS = [
-  { value: 14, label: "slash commands" },
+  { value: 19, label: "slash commands" },
   { value: 21, label: "Tiptap peers, auto-installed" },
   { value: 4, label: "output formats" },
   { value: 3, label: "toolbars, two self-mounting" },

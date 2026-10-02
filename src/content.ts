@@ -14,7 +14,8 @@
  *   <div className={CONTENT_SCOPE_CLASS} dangerouslySetInnerHTML={{ __html: html }} />
  *
  * Code blocks render uncoloured; `highlightCodeBlocks(element)` colours them
- * once the HTML is in a DOM.
+ * once the HTML is in a DOM. Embedded X posts keep a fixed height until
+ * `resizeTweetEmbeds(element)` lets them grow to fit.
  */
 export {
   AiAssistHighlight,
@@ -42,6 +43,8 @@ export {
   CELL_MIN_WIDTH,
   ContentTable,
 } from "./editor/tiptap-cores/nodes/table-node/table-node-schema";
+export { TweetEmbedNode } from "./editor/tiptap-cores/nodes/tweet-embed-node/tweet-embed-node-schema";
+export { resizeTweetEmbeds } from "./editor/tiptap-cores/nodes/tweet-embed-node/tweet-embed-utils";
 export { VideoEmbedNode } from "./editor/tiptap-cores/nodes/video-embed-node/video-embed-node-schema";
 export {
   VideoNode,

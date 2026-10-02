@@ -82,7 +82,7 @@ type.
 
 ## Try these
 
-- Type \`/\` for the slash menu — paragraph, headings, lists, quote, code, emoji, table, image, video, horizontal line
+- Type \`/\` for the slash menu — paragraph, headings, lists, quote, code, emoji, table, image, video, X post, horizontal line
 - Select text to raise the floating toolbar, or use the toolbar above
 - Type \`:\` to open the emoji picker
 - Drag the handle to the left of any block to reorder it; \`Mod-Shift-↑/↓\` moves it, \`Mod-Shift-D\` duplicates it

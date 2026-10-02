@@ -13,6 +13,7 @@ export { RichTextEditor } from "./editor/rich-text-editor";
 export { SelectionToolbar } from "./editor/selection-toolbar";
 export type { EditorImageUploadHandler } from "./editor/tiptap-cores/hooks/use-editor-image-upload";
 export { highlightCodeBlocks } from "./editor/tiptap-cores/nodes/code-block-node/code-block-highlight";
+export { resizeTweetEmbeds } from "./editor/tiptap-cores/nodes/tweet-embed-node/tweet-embed-utils";
 export type { EditorVideoUploadHandler } from "./editor/tiptap-cores/nodes/video-node/video-upload-node-extension";
 export { ToC, ToCEmptyState, ToCItem } from "./editor/toc";
 export type {

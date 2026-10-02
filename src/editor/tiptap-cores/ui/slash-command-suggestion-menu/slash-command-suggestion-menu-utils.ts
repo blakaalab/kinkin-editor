@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 
 import { isNodeInSchema } from "../../lib/tiptap-utils";
+import { XLogo } from "../../nodes/tweet-embed-node/x-logo";
 import { addEmojiTrigger } from "../../ui/emoji-suggestion-menu/emoji-suggestion-menu-utils";
 import type { SuggestionItem } from "../../ui/suggestion-menu";
 
@@ -244,6 +245,11 @@ const menuItemTexts = {
     aliases: ["video", "youtube", "tiktok", "embed", "movie", "clip", "mp4"],
     badge: Video,
   },
+  tweet: {
+    title: "X post",
+    aliases: ["x", "twitter", "tweet", "post", "embed"],
+    badge: XLogo,
+  },
   columns_2: {
     title: "2 columns",
     aliases: ["columns", "column", "cols", "layout", "2col", "split"],
@@ -273,7 +279,7 @@ const menuItemSections: SlashMenuItemType[][] = [
   ["text", "heading_1", "heading_2", "heading_3", "heading_4"],
   ["bullet_list", "ordered_list", "task_list"],
   ["code_block", "quote"],
-  ["table", "image", "video"],
+  ["table", "image", "video", "tweet"],
   ["columns_2", "columns_3", "columns_4"],
   ["emoji", "divider"],
 ];
@@ -405,6 +411,12 @@ const getMenuItemImplementations = () => ({
     check: (editor: Editor) => isNodeInSchema("videoEmbed", editor),
     action: ({ editor }: { editor: Editor }) => {
       editor.chain().focus().insertVideoEmbedPlaceholder().run();
+    },
+  },
+  tweet: {
+    check: (editor: Editor) => isNodeInSchema("tweetEmbed", editor),
+    action: ({ editor }: { editor: Editor }) => {
+      editor.chain().focus().insertTweetEmbedPlaceholder().run();
     },
   },
 });

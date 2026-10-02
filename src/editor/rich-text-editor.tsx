@@ -55,6 +55,7 @@ import { EditorCodeBlock } from "@/editor/tiptap-cores/nodes/code-block-node/cod
 import { EditorImage } from "@/editor/tiptap-cores/nodes/image-node/image-node-extension";
 import { ImageUpload } from "@/editor/tiptap-cores/nodes/image-node/image-upload-node-extension";
 import { CustomTable } from "@/editor/tiptap-cores/nodes/table-node/table-node-extension";
+import { TweetEmbed } from "@/editor/tiptap-cores/nodes/tweet-embed-node/tweet-embed-node-extension";
 import { VideoEmbed } from "@/editor/tiptap-cores/nodes/video-embed-node/video-embed-node-extension";
 import { EditorVideo } from "@/editor/tiptap-cores/nodes/video-node/video-node-extension";
 import {
@@ -107,6 +108,8 @@ const withEditorBehaviour = (
       return VideoEmbed;
     case "videoUpload":
       return VideoUpload;
+    case "tweetEmbed":
+      return TweetEmbed;
     case "tableOfContents":
       return TableOfContents.configure({
         onUpdate: (items) => onTocItemsChange?.(items),

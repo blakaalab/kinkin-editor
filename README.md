@@ -59,7 +59,7 @@ upload and AI are plain callbacks you supply, or leave out.
 ## Features
 
 **Slash menu** (type `/`): Paragraph, Heading 1–4, Bullet list, Numbered list,
-Task list, Quote, Code, Emoji, Table, Image, Video, Columns (2–4), Horizontal line.
+Task list, Quote, Code, Emoji, Table, Image, Video, X post, Columns (2–4), Horizontal line.
 
 **Also built in**
 
@@ -76,6 +76,10 @@ Task list, Quote, Code, Emoji, Table, Image, Video, Columns (2–4), Horizontal 
   empty line. Shorts and TikToks embed upright at 9:16. Saved as the link, in
   markdown as `:::videoEmbed {src="…"} :::`; the iframe is rebuilt from the
   video id on every render, so a document can't carry any other iframe
+- X (Twitter) post embeds — `/x post` from the slash menu, paste a post link on
+  an empty line, or paste the embed code X gives you. Saved as the link, in
+  markdown as `:::tweetEmbed {src="…"} :::`; like videos, the iframe is rebuilt
+  from the post id, and X's `widgets.js` never runs on your page
 - Video upload through a callback you supply — drop or paste a video file, or
   use "Upload file" in the `/video` field. It plays in the browser's own player
 - Resizable images and videos — drag the handle on either side; the media
@@ -322,6 +326,24 @@ useEffect(() => {
 On a server, run it on the same jsdom / happy-dom tree `generateHTML` needs, and
 serialise that tree's `innerHTML` instead. Running it twice is harmless.
 
+### X posts
+
+An embedded post only knows its height once it has loaded, and reports it to
+the page in a message. The editor listens for that; on a rendered page, call
+`resizeTweetEmbeds` once the HTML is in the DOM, or each post keeps
+`content.css`'s fixed stand-in height and may be cut off:
+
+```tsx
+import { resizeTweetEmbeds } from "@blakaa/kinkin-editor/content";
+
+useEffect(() => {
+  if (ref.current) return resizeTweetEmbeds(ref.current);
+}, []);
+```
+
+It returns the function that stops listening. Posts added to the element later
+are picked up without calling it again.
+
 ### `content.css`
 
 The display half. Content rules only — no toolbars, menus, selection or drag
@@ -558,6 +580,7 @@ Omit it and the AI buttons become no-ops, with a console warning.
 | `createContentExtensions()` | The schema-only extension list, for rendering saved documents. Also at `@blakaa/kinkin-editor/content`. |
 | `CONTENT_SCOPE_CLASS` | `"kinkin-content"` — the class `content.css` scopes to. |
 | `highlightCodeBlocks(element)` | Colours the code blocks of rendered HTML, the way the editor does. Also at `@blakaa/kinkin-editor/content`. |
+| `resizeTweetEmbeds(element)` | Lets the X posts in rendered HTML grow to fit; returns a cleanup function. Also at `@blakaa/kinkin-editor/content`. |
 | `<ToCItem />`, `<ToCEmptyState />` | The pieces `<ToC />` is built from, if you want your own outline layout. |
 | Types | `RichTextEditorProps`, `EditorImageUploadHandler`, `EditorVideoUploadHandler`, `StreamCompletionFn`, `StreamCompletionParams` |
 
